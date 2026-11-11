@@ -324,7 +324,7 @@ $("notesOpen").addEventListener("click",()=>{
   <footer>FOCUS · LEARN · REMEMBER <span>${i+1}</span></footer>
  </section>`).join("");
  printWindow.document.open();
- printWindow.document.write(`<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>สมุดจดมีเส้น - ${escapeHTML(subject)}</title><style>
+ printWindow.document.write(`<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>กระดาษจดเปล่า - ${escapeHTML(subject)}</title><style>
  @page{size:A4;margin:0}
  *{box-sizing:border-box}
  html,body{margin:0;padding:0;background:#eef1f5;color:#26384c;font-family:Arial,'Noto Sans Thai',sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
@@ -335,14 +335,14 @@ $("notesOpen").addEventListener("click",()=>{
  .brand span{color:#b18b4b}
  .page-no{font-size:8pt;letter-spacing:1px;color:#8796a7}
  h1{font-size:17pt;font-weight:800;color:#172b43;margin:7mm 0 4mm}
- .page-meta{display:flex;justify-content:space-between;gap:8mm;font-size:9pt;color:#8291a1;padding-bottom:3mm;border-bottom:.25mm solid #dce4ec}
- .writing-area{height:235mm;margin-top:4mm;border-left:.35mm solid #e1bd78;background-image:repeating-linear-gradient(to bottom,transparent 0,transparent 8.35mm,#dce6ef 8.35mm,#dce6ef 8.55mm);background-position:0 0}
+ .page-meta{display:flex;justify-content:space-between;gap:8mm;font-size:9pt;color:#8291a1;padding-bottom:3mm}
+ .writing-area{height:235mm;margin-top:4mm;background:none;border:0}
  footer{position:absolute;left:18mm;right:15mm;bottom:7mm;display:flex;justify-content:space-between;font-size:7pt;letter-spacing:1.5px;color:#a0adba}
  @media screen{body{padding:12px 0}.sheet{box-shadow:0 5px 25px #172b4320}}
  @media print{html,body{background:#fff}.sheet{margin:0;box-shadow:none}}
  </style></head><body>${pages}<script>window.onload=()=>setTimeout(()=>window.print(),450)<\/script></body></html>`);
  printWindow.document.close();
- $("status").textContent="สร้างกระดาษจด 5 หน้าแล้ว · เลือก Save as PDF แล้วนำเข้า Goodnotes";
+ $("status").textContent="สร้างกระดาษจดเปล่า 5 หน้าแล้ว · เลือก Save as PDF แล้วนำเข้า Goodnotes";
 });
 show();
 </script>
