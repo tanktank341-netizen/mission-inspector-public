@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1728">
+<title>MISSION INSPECTOR · Focus Room</title>
+<style>
+:root{--bg:#0b1220;--panel:#111e30;--panel2:#172840;--line:#293b51;--text:#f4f7fb;--muted:#9aabc0;--gold:#e9c477;--red:#e36b72;--green:#67c69b}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -15%,#234363 0,transparent 48%),var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:env(safe-area-inset-top) 16px env(safe-area-inset-bottom);-webkit-font-smoothing:antialiased}
+button,select{font:inherit}
+.shell{width:min(100%,650px);margin:0 auto;padding:28px 0 42px}
+.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:30px}
+.brand{font-size:11px;letter-spacing:3px;font-weight:900;color:var(--gold)}
+.edition{font-size:10px;color:var(--muted);letter-spacing:1px}
+.intro{margin-bottom:25px}
+h1{font-size:clamp(29px,7vw,40px);letter-spacing:-1px;line-height:1.12;margin:0 0 9px}
+.intro p{margin:0;color:var(--muted);font-size:13px}
+.daily-card{margin:0 0 18px;padding:17px 18px;border:1px solid #8d7449;border-radius:18px;background:linear-gradient(135deg,#1b3048,#122238);box-shadow:0 12px 30px #0003}
+.daily-kicker{font-size:10px;letter-spacing:2px;color:var(--gold);font-weight:900}
+.daily-day{font-size:11px;color:#a9b9ca;margin-top:7px}
+.daily-subject{font-size:20px;line-height:1.35;font-weight:850;margin:5px 0 12px;color:#f6f4ee}
+.daily-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.daily-actions button{padding:10px 13px;font-size:11px}
+.schedule{margin-top:13px;border-top:1px solid #40536a;padding-top:12px}
+.schedule summary{color:#d9c18f;font-size:11px;font-weight:800;cursor:pointer;letter-spacing:.4px}
+.schedule-list{display:grid;grid-template-columns:1fr 1fr;gap:7px 10px;margin-top:12px}
+.schedule-row{display:flex;align-items:flex-start;gap:8px;padding:8px 9px;border-radius:10px;background:#0b192a;color:#c5d1df;font-size:11px;line-height:1.45}
+.schedule-row.today{border:1px solid #b89556;background:#26354a;color:#fff}
+.schedule-day{color:var(--gold);font-weight:850;min-width:54px}
+.schedule-note{color:#91a2b7;font-size:10px;line-height:1.5;margin-top:10px}
+@media(max-width:390px){.daily-card{padding:15px}.daily-subject{font-size:18px}.schedule-list{grid-template-columns:1fr}}
+.panel{background:linear-gradient(155deg,#172941,#101c2d 70%);border:1px solid #31465e;border-radius:25px;padding:22px;box-shadow:0 22px 55px #0004}
+.label{display:block;color:#b6c4d4;font-size:11px;font-weight:800;letter-spacing:1.2px;margin:0 0 10px}
+.select-wrap{position:relative}
+select{appearance:none;width:100%;padding:16px 45px 16px 15px;background:#0c1929;color:var(--text);border:1px solid #3a5069;border-radius:13px;font-size:16px;font-weight:700;outline:none}
+.select-wrap:after{content:"⌄";position:absolute;right:17px;top:10px;color:var(--gold);font-size:23px;pointer-events:none}
+.subject-note{min-height:20px;color:var(--muted);font-size:11px;margin:9px 2px 0}
+.timerbox{margin-top:30px;text-align:center}
+.timer-caption{font-size:11px;color:var(--gold);font-weight:900;letter-spacing:2px}
+.clock{font-size:clamp(76px,19vw,112px);font-weight:850;letter-spacing:-4px;line-height:1.2;font-variant-numeric:tabular-nums;margin:9px 0 18px}
+.clock-row{display:flex;align-items:center;justify-content:center;gap:clamp(8px,2.5vw,18px);margin:9px 0 18px}
+.clock-row .clock{margin:0}
+
+
+to{transform:rotate(360deg)}}
+to{-webkit-transform:rotate(360deg)}}
+.focus-clock-row{display:flex;align-items:center;justify-content:center;gap:clamp(8px,3vw,20px);margin:18px 0 25px}
+.focus-clock-row .focus-clock{margin:0}
+.focus-clock-row 
+.focus-clock-row{display:flex;align-items:center;justify-content:center;gap:clamp(8px,3vw,20px);margin:18px 0 25px}
+.focus-clock-row .focus-clock{margin:0}
+
+.track{height:18px;border-radius:30px;background:#081321;border:1px solid #354a61;overflow:hidden;box-shadow:inset 0 2px 6px #0008}
+.fill{height:100%;width:100%;border-radius:30px;background:linear-gradient(90deg,#bd515e,#e88a76 55%,#f0c77c);box-shadow:0 0 16px #e36b7270;transition:width .25s linear;position:relative}
+.fill:after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 25%,#ffffff55 48%,transparent 68%);animation:flow 2.5s linear infinite}
+@keyframes flow{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+.remaining{display:flex;justify-content:space-between;color:var(--muted);font-size:10px;margin-top:8px}
+.controls{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:9px;margin-top:24px}
+button{border:1px solid #40566e;border-radius:13px;padding:14px 9px;color:var(--text);background:#243a53;font-size:13px;font-weight:800;cursor:pointer;transition:.15s}
+button:active{transform:scale(.97)}
+button.primary{background:linear-gradient(135deg,#f1d28e,#d8ad60);border:0;color:#15263b}
+button:disabled{opacity:.45;cursor:not-allowed}
+.length{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:22px;color:var(--muted);font-size:11px}
+.length button{padding:7px 12px;border-radius:9px;font-size:11px;background:#0d1b2c}
+.length strong{color:var(--text);font-size:13px;min-width:52px}
+.status{min-height:20px;text-align:center;color:var(--green);font-size:11px;margin-top:18px}
+.cycle-progress{margin:12px auto 0;color:#b9c7d7;font-size:11px;letter-spacing:.5px}.cycle-dots{display:flex;justify-content:center;gap:8px;margin-top:9px}.cycle-dots span{width:9px;height:9px;border-radius:50%;background:#34475e;border:1px solid #64768b}.cycle-dots span.done{background:var(--gold);border-color:var(--gold);box-shadow:0 0 8px #e9c47766}
+.bottom{text-align:center;color:#64768c;font-size:10px;letter-spacing:.5px;margin-top:24px}
+.focus-launch{width:100%;margin-top:12px;background:transparent;border:1px solid #8d7449;color:var(--gold);padding:13px}
+.focus-overlay{display:none;position:fixed;inset:0;z-index:20;padding:calc(env(safe-area-inset-top) + 18px) 20px calc(env(safe-area-inset-bottom) + 20px);background:radial-gradient(ellipse at 50% 0%,#274969 0,transparent 48%),#081321;align-items:center;justify-content:center}
+.focus-overlay.active{display:flex}
+.focus-inner{width:min(100%,620px);text-align:center}
+.focus-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:clamp(35px,9vh,85px)}
+.focus-tag{font-size:10px;letter-spacing:3px;color:var(--gold);font-weight:900}
+.focus-close{background:#ffffff10;border:1px solid #ffffff35;padding:10px 13px;color:#eaf0f7;font-size:12px}
+.focus-subject{font-size:clamp(21px,5vw,30px);font-weight:800;margin:12px 0 6px}
+.focus-caption{font-size:11px;color:var(--gold);letter-spacing:2px;font-weight:900}
+.focus-clock{font-size:clamp(90px,23vw,150px);font-weight:850;letter-spacing:-5px;font-variant-numeric:tabular-nums;line-height:1.15;margin:18px 0 25px}
+.focus-track{height:20px;border-radius:30px;background:#050c15;border:1px solid #46566a;overflow:hidden;box-shadow:inset 0 2px 7px #0009}
+.focus-fill{height:100%;width:100%;background:linear-gradient(90deg,#b94e5a,#df8874 55%,#f1ce87);border-radius:30px;transition:width .25s linear;box-shadow:0 0 22px #e2bd7270}
+.focus-meta{display:flex;justify-content:space-between;color:#91a2b7;font-size:10px;margin-top:9px}
+.focus-controls{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:9px;margin-top:30px}
+.focus-controls button{padding:16px 8px}
+.rest-button{display:block;width:100%;margin-top:10px;background:linear-gradient(135deg,#203e4b,#172f3c);border:1px solid #67a99a;color:#a9e5d2;padding:13px}.focus-rest{display:block;width:100%;margin-top:10px;background:linear-gradient(135deg,#203e4b,#172f3c);border:1px solid #67a99a;color:#a9e5d2;padding:14px}
+.focus-quote{margin-top:clamp(35px,9vh,80px);color:#8294a9;font-size:11px;letter-spacing:1px}
+.notes-launch{width:100%;margin-top:10px;background:#172840;border:1px solid #8d7449;color:var(--gold);padding:13px}
+.notes-overlay{display:none;position:fixed;inset:0;z-index:30;padding:calc(env(safe-area-inset-top) + 14px) 14px calc(env(safe-area-inset-bottom) + 14px);background:#050d18eF;align-items:center;justify-content:center}
+.notes-overlay.active{display:flex}
+.notes-dialog{width:min(100%,720px);max-height:100%;display:flex;flex-direction:column;background:linear-gradient(155deg,#172941,#101c2d 75%);border:1px solid #465b72;border-radius:22px;padding:18px;box-shadow:0 24px 70px #0009}
+.notes-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}
+.notes-kicker{font-size:10px;letter-spacing:2px;color:var(--gold);font-weight:900}
+.notes-title{font-size:21px;font-weight:850;margin-top:5px}
+.notes-close{padding:9px 12px;background:#ffffff10;border-color:#ffffff30;font-size:12px;white-space:nowrap}
+.notes-hint{font-size:11px;color:var(--muted);margin:0 0 10px}
+.notes-editor{width:100%;min-height:42vh;max-height:58vh;resize:vertical;border:1px solid #3a5069;border-radius:14px;background:#0a1727;color:#f4f7fb;padding:15px;font:15px/1.8 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;outline:none}
+.notes-editor:focus{border-color:var(--gold)}
+.notes-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;flex-wrap:wrap}
+.notes-save-state{font-size:10px;color:var(--green)}
+.notes-actions{display:flex;gap:8px}
+.notes-actions button{padding:11px 13px;font-size:12px}
+body.notes-open{overflow:hidden}
+@media(max-width:420px){.notes-dialog{padding:14px}.notes-title{font-size:18px}.notes-editor{min-height:48vh;font-size:14px}.notes-actions{width:100%}.notes-actions button{flex:1}}
+body.focus-open{overflow:hidden}
+@media(max-width:390px){.focus-clock{letter-spacing:-4px}.focus-controls{gap:6px}.focus-controls button{font-size:12px;padding:14px 5px}}
+@media(max-width:390px){.shell{padding-top:20px}.panel{padding:17px}.clock{letter-spacing:-3px}.controls{gap:6px}.controls button{font-size:12px;padding:13px 5px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="shell">
+ <div class="top"><div class="brand">MISSION INSPECTOR</div><div class="edition">FOCUS ROOM · 2026</div></div>
+ <section class="intro"><h1>ว่าที่ผู้หมวด<br>วันนี้จะลุยวิชาอะไรดี?</h1><p>เลือกหนึ่งวิชา แล้วเริ่มโฟกัสกับเป้าหมายของเรา</p></section>
+ <section class="daily-card" aria-live="polite">
+  <div class="daily-kicker">TODAY'S MISSION · ตารางอ่านประจำวัน</div>
+  <div class="daily-day" id="dailyDay">วันพุธ</div>
+  <div class="daily-subject" id="dailySubject">ภาษาอังกฤษ</div>
+  <div class="daily-actions"><button class="primary" id="useDailySubject">เลือกวิชานี้เพื่อเริ่มอ่าน</button></div>
+  <details class="schedule">
+   <summary>ดูตารางอ่านครบ 7 วัน</summary>
+   <div class="schedule-list" id="scheduleList"></div>
+   <div class="schedule-note">หลักการ: วันละ 1 วิชา หากติดเวรให้เลื่อนวิชาของวันนั้นไปอ่านวันถัดไป โดยไม่ต้องฝืนอ่านหลายวิชาในวันเดียว</div>
+  </details>
+ </section>
+ <main class="panel">
+  <label class="label" for="subject">เลือกวิชาที่ต้องการอ่าน</label>
+  <div class="select-wrap"><select id="subject">
+   <option value="ทักษะงานอำนวยการ">ทักษะงานอำนวยการ</option>
+   <option value="งานสารบรรณ + ระเบียบตำรวจ">งานสารบรรณ + ระเบียบตำรวจ</option>
+   <option value="คณิตศาสตร์">คณิตศาสตร์</option>
+   <option value="ภาษาไทย">ภาษาไทย</option>
+   <option value="ภาษาอังกฤษ">ภาษาอังกฤษ</option>
+   <option value="คอมพิวเตอร์">คอมพิวเตอร์</option>
+   <option value="พ.ร.บ.ตำรวจ + กฎ ก.ตร.">พ.ร.บ.ตำรวจ + กฎ ก.ตร.</option>
+  </select></div>
+  <div class="subject-note" id="subjectNote">ภารกิจและกระบวนการงานอำนวยการ</div>
+  <section class="timerbox" aria-label="ตัวจับเวลาอ่านหนังสือ">
+   <div class="timer-caption" id="timerCaption">FOCUS SESSION</div>
+   <div class="clock-row"><div class="clock" id="clock">25:00</div></div>
+   <div class="track" role="progressbar" aria-label="เวลาที่เหลือ" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><div class="fill" id="fill"></div></div>
+   <div class="remaining"><span>เริ่มต้น</span><span id="remainText">เหลือ 25 นาที</span></div>
+   <div class="controls">
+    <button class="primary" id="start">▶ เริ่มอ่าน</button>
+    <button id="pause">Ⅱ พัก</button>
+    <button id="reset">↺ เริ่มใหม่</button>
+   </div>
+   <button class="rest-button" id="restStart">☕ พัก 5 นาที</button>
+   <div class="length"><span>เวลาต่อรอบ</span><button id="minus" aria-label="ลดเวลา">−</button><strong id="lengthText">25 นาที</strong><button id="plus" aria-label="เพิ่มเวลา">+</button></div>
+   <div class="status" id="status" aria-live="polite">พร้อมเริ่มภารกิจ</div>
+   <div class="cycle-progress" id="cycleProgress">รอบที่ 1 / 4</div><div class="cycle-dots" id="cycleDots"><span></span><span></span><span></span><span></span></div>
+   <button class="focus-launch" id="focusOpen">⛶ เข้าสู่ Focus Mode</button>
+   <button class="notes-launch" id="notesOpen">⇩ ส่งออกกระดาษสำหรับจด</button>
+  </section>
+ </main>
+ <div class="bottom">ONE SUBJECT · ONE SESSION · ONE STEP CLOSER</div>
+</div>
+<div class="focus-overlay" id="focusOverlay" role="dialog" aria-modal="true" aria-label="Focus Mode">
+ <div class="focus-inner">
+  <div class="focus-top"><span class="focus-tag">MISSION INSPECTOR · FOCUS MODE</span><button class="focus-close" id="focusClose">✕ ออกจากโหมด</button></div>
+  <div class="focus-caption" id="focusCaption">STAY FOCUSED</div>
+  <div class="focus-subject" id="focusSubject">ทักษะงานอำนวยการ</div>
+  <div class="focus-clock-row"><div class="focus-clock" id="focusClock">25:00</div></div>
+  <div class="focus-track"><div class="focus-fill" id="focusFill"></div></div>
+  <div class="focus-meta"><span>เวลาที่เหลือ</span><span id="focusRemain">25 นาที</span></div>
+  <div class="focus-controls"><button class="primary" id="focusStart">▶ เริ่มอ่าน</button><button id="focusPause">Ⅱ พัก</button><button id="focusReset">↺ เริ่มใหม่</button></div>
+  <button class="focus-rest" id="focusRestStart">☕ พัก 5 นาที</button>
+  <div class="focus-quote">ONE TASK. FULL ATTENTION. KEEP MOVING.</div>
+ </div>
+</div>
+<script>
+const subjects={
+ "ทักษะงานอำนวยการ":"ภารกิจและกระบวนการงานอำนวยการ",
+ "งานสารบรรณ + ระเบียบตำรวจ":"หนังสือราชการ ขั้นตอน และระเบียบที่เกี่ยวข้อง",
+ "คณิตศาสตร์":"ทบทวนสูตร ฝึกคำนวณ และทำโจทย์",
+ "ภาษาไทย":"หลักภาษา การอ่านจับใจความ และการใช้ภาษา",
+ "ภาษาอังกฤษ":"Vocabulary · Grammar · Reading",
+ "คอมพิวเตอร์":"อุปกรณ์ ระบบคอมพิวเตอร์ และเทคโนโลยี",
+ "พ.ร.บ.ตำรวจ + กฎ ก.ตร.":"กฎหมายตำรวจและจรรยาบรรณของตำรวจ"
+};
+const $=id=>document.getElementById(id);
+const weeklySchedule=[
+ {day:"อาทิตย์",subject:"ภาษาไทย"},
+ {day:"จันทร์",subject:"ทักษะงานอำนวยการ"},
+ {day:"อังคาร",subject:"งานสารบรรณ + ระเบียบตำรวจ"},
+ {day:"พุธ",subject:"ภาษาอังกฤษ"},
+ {day:"พฤหัสบดี",subject:"พ.ร.บ.ตำรวจ + กฎ ก.ตร."},
+ {day:"ศุกร์",subject:"คณิตศาสตร์"},
+ {day:"เสาร์",subject:"คอมพิวเตอร์"}
+];
+function renderDailyPlan(){
+ const now=new Date(),today=weeklySchedule[now.getDay()];
+ $("dailyDay").textContent="วันนี้ · วัน"+today.day+" · "+now.toLocaleDateString("th-TH",{day:"numeric",month:"long",year:"numeric"});
+ $("dailySubject").textContent=today.subject;
+ $("useDailySubject").onclick=()=>{
+  $("subject").value=today.subject;
+  $("subject").dispatchEvent(new Event("change"));
+  $("status").textContent="เลือกวิชาตามตารางวันนี้: "+today.subject;
+  $("subject").scrollIntoView({behavior:"smooth",block:"center"});
+ };
+ $("scheduleList").innerHTML=weeklySchedule.slice(1).concat(weeklySchedule[0]).map((item)=>{
+  const isToday=item.day===today.day;
+  return '<div class="schedule-row'+(isToday?' today':'')+'"><span class="schedule-day">วัน'+item.day+'</span><span>'+item.subject+(isToday?' · วันนี้':'')+'</span></div>';
+ }).join("");
+}
+renderDailyPlan();
+let minutes=25,duration=minutes*60,remaining=duration,interval=null,endAt=null,timerMode="focus",breakAvailable=false,completedSessions=0,breakDuration=300,breakKind="short";
+function show(){
+ const m=Math.floor(remaining/60),s=remaining%60;
+ const time=String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+ const pct=duration?remaining/duration*100:0;
+ $("clock").textContent=time;
+ $("fill").style.width=pct+"%";
+ $("fill").parentElement.setAttribute("aria-valuenow",String(Math.round(pct)));
+ const remain="เหลือ "+(remaining%60?Math.ceil(remaining/60):remaining/60)+" นาที";
+ $("remainText").textContent=remain;
+ $("lengthText").textContent=minutes+" นาที";
+ if($("focusClock")){$("focusClock").textContent=time;$("focusFill").style.width=pct+"%";$("focusRemain").textContent=remain;$("focusSubject").textContent=$("subject").value}
+ $("restStart").disabled=!breakAvailable;
+ $("focusRestStart").disabled=!breakAvailable;
+ const restLabel=breakKind==="long"?"☕ พักยาว 30 นาที":"☕ พัก 5 นาที";
+ const lockedLabel=breakKind==="long"?"☕ พักยาว 30 นาที · หลังครบ 4 รอบ":"☕ พัก 5 นาที · หลังจบรอบอ่าน";
+ $("restStart").textContent=breakAvailable?restLabel:lockedLabel;
+ $("focusRestStart").textContent=breakAvailable?restLabel:lockedLabel;
+ $("timerCaption").textContent=timerMode==="break"?(remaining===0?"BREAK COMPLETE":breakKind==="long"?"LONG BREAK":"SHORT BREAK"):(remaining===0?"SESSION COMPLETE":"FOCUS SESSION");
+ $("focusCaption").textContent=timerMode==="break"?(remaining===0?"BREAK COMPLETE":breakKind==="long"?"LONG BREAK":"TAKE A BREATH"):(remaining===0?"SESSION COMPLETE":"STAY FOCUSED");
+ $("start").textContent=timerMode==="break"?(remaining===0?"▶ เริ่มอ่านต่อ":breakKind==="long"?"▶ เริ่มพักยาวต่อ":"▶ เริ่มพักต่อ"):"▶ เริ่มอ่าน";
+ $("focusStart").textContent=timerMode==="break"?(remaining===0?"▶ เริ่มอ่านต่อ":breakKind==="long"?"▶ เริ่มพักยาวต่อ":"▶ เริ่มพักต่อ"):"▶ เริ่มอ่าน";
+ $("cycleProgress").textContent=completedSessions>=4?"ครบ 4 รอบ · พักยาว 30 นาที":`อ่านแล้ว ${completedSessions} / 4 รอบ · รอบถัดไป ${Math.min(completedSessions+1,4)}`;
+ [...$("cycleDots").children].forEach((dot,i)=>dot.classList.toggle("done",i<completedSessions));
+}
+function stop(){if(interval)clearInterval(interval);interval=null;endAt=null}
+function alertCompletion(message){
+ let vibrationMessage="";
+ try{
+  if(typeof navigator!=="undefined"&&typeof navigator.vibrate==="function"){
+   const didVibrate=navigator.vibrate([400,150,400,150,700]);
+   vibrationMessage=didVibrate?"":" (อุปกรณ์ไม่อนุญาตให้สั่น)";
+  }else vibrationMessage=" (เบราว์เซอร์นี้ไม่รองรับระบบสั่น)";
+ }catch(e){vibrationMessage=" (ไม่สามารถใช้ระบบสั่นได้)"}
+ $("status").textContent=message+vibrationMessage;
+ try{const C=window.AudioContext||window.webkitAudioContext;if(C){const ctx=new C(),o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.value=740;g.gain.value=.12;o.start();o.stop(ctx.currentTime+.45);o.onended=()=>ctx.close()}}catch(e){}
+}
+function tick(){
+ remaining=Math.max(0,Math.ceil((endAt-Date.now())/1000));show();
+ if(remaining<=0){
+  stop();
+  if(timerMode==="focus"){
+   completedSessions=Math.min(4,completedSessions+1);
+   breakKind=completedSessions===4?"long":"short";
+   breakDuration=breakKind==="long"?1800:300;
+   breakAvailable=true;
+   show();
+   alertCompletion(breakKind==="long"?"ครบ 4 รอบแล้ว! ถึงเวลาพักยาว 30 นาที 🎉":"ครบเวลาอ่านแล้ว! พัก 5 นาทีได้เลย ☕");
+  }else{
+   const wasLongBreak=breakKind==="long";
+   if(wasLongBreak)completedSessions=0;
+   timerMode="focus";breakAvailable=false;duration=minutes*60;remaining=duration;
+   show();
+   alertCompletion(wasLongBreak?"พักยาวครบแล้ว! เริ่ม Cycle ใหม่ได้เลย 💪":"พักครบ 5 นาทีแล้ว! กลับไปอ่านรอบถัดไปได้เลย 💪");
+  }
+ }
+}
+$("subject").addEventListener("change",e=>{
+ $("subjectNote").textContent=subjects[e.target.value];
+ $("focusSubject").textContent=e.target.value;
+ $("status").textContent="เลือกวิชา: "+e.target.value;
+});
+function startTimer(){
+ if(interval)return;
+ if(remaining<=0){
+  if(timerMode==="break")return;
+  duration=minutes*60;remaining=duration;breakAvailable=false;
+  show();
+ }
+ endAt=Date.now()+remaining*1000;
+ interval=setInterval(tick,200);
+ $("status").textContent=timerMode==="break"?(breakKind==="long"?"กำลังพักยาว 30 นาที ☕":"กำลังพัก 5 นาที ☕"):"กำลังอ่าน: "+$("subject").value;
+ show();
+}
+$("start").addEventListener("click",startTimer);
+function startBreak(){
+ if(interval||!breakAvailable)return;
+ timerMode="break";breakAvailable=false;duration=breakDuration;remaining=breakDuration;show();startTimer();
+}
+$("restStart").addEventListener("click",startBreak);
+$("focusRestStart").addEventListener("click",startBreak);
+$("pause").addEventListener("click",()=>{
+ if(!interval)return;
+ remaining=Math.max(0,Math.ceil((endAt-Date.now())/1000));stop();show();
+ $("status").textContent="พักเวลาไว้แล้ว";
+});
+$("reset").addEventListener("click",()=>{
+ stop();timerMode="focus";breakAvailable=false;completedSessions=0;breakKind="short";breakDuration=300;duration=minutes*60;remaining=duration;show();$("status").textContent="เริ่ม Cycle ใหม่ได้เลย";
+});
+function changeLength(delta){
+ if(interval||timerMode==="break")return;
+ minutes=Math.min(120,Math.max(5,minutes+delta));duration=minutes*60;remaining=duration;show();
+ $("status").textContent="ตั้งเวลา "+minutes+" นาทีแล้ว";
+}
+$("minus").addEventListener("click",()=>changeLength(-5));
+$("plus").addEventListener("click",()=>changeLength(5));
+function openFocus(){
+ $("focusOverlay").classList.add("active");document.body.classList.add("focus-open");
+ $("focusSubject").textContent=$("subject").value;show();
+}
+function closeFocus(){$("focusOverlay").classList.remove("active");document.body.classList.remove("focus-open")}
+$("focusOpen").addEventListener("click",openFocus);
+$("focusClose").addEventListener("click",closeFocus);
+$("focusStart").addEventListener("click",startTimer);
+$("focusPause").addEventListener("click",()=>$("pause").click());
+$("focusReset").addEventListener("click",()=>$("reset").click());
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&$("focusOverlay").classList.contains("active"))closeFocus()});
+function escapeHTML(value){return value.replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]))}
+$("notesOpen").addEventListener("click",()=>{
+ const subject=$("subject").value;
+ const printWindow=window.open("","_blank");
+ if(!printWindow){$("status").textContent="เบราว์เซอร์บล็อกหน้าต่าง PDF · อนุญาตป๊อปอัปแล้วลองอีกครั้ง";return}
+ const pages=Array.from({length:5},(_,i)=>`<section class="sheet">
+  <header class="page-head"><div class="brand">MISSION INSPECTOR <span>· STUDY NOTES</span></div><div class="page-no">0${i+1} / 05</div></header>
+  <h1>${escapeHTML(subject)}</h1>
+  <div class="page-meta"><span>วันที่ ____________________</span><span>หัวข้อ ______________________________</span></div>
+  <div class="writing-area"></div>
+  <footer>FOCUS · LEARN · REMEMBER <span>${i+1}</span></footer>
+ </section>`).join("");
+ printWindow.document.open();
+ printWindow.document.write(`<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>สมุดจดมีเส้น - ${escapeHTML(subject)}</title><style>
+ @page{size:A4;margin:0}
+ *{box-sizing:border-box}
+ html,body{margin:0;padding:0;background:#eef1f5;color:#26384c;font-family:Arial,'Noto Sans Thai',sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+ .sheet{position:relative;width:210mm;height:297mm;padding:13mm 15mm 13mm 18mm;margin:0 auto 8mm;background:#fff;overflow:hidden;page-break-after:always;break-after:page}
+ .sheet:last-child{page-break-after:auto;break-after:auto}
+ .page-head{display:flex;justify-content:space-between;align-items:center;border-bottom:1.1mm solid #d6b66f;padding-bottom:4mm}
+ .brand{font-size:9pt;letter-spacing:2px;font-weight:800;color:#17304b}
+ .brand span{color:#b18b4b}
+ .page-no{font-size:8pt;letter-spacing:1px;color:#8796a7}
+ h1{font-size:17pt;font-weight:800;color:#172b43;margin:7mm 0 4mm}
+ .page-meta{display:flex;justify-content:space-between;gap:8mm;font-size:9pt;color:#8291a1;padding-bottom:3mm;border-bottom:.25mm solid #dce4ec}
+ .writing-area{height:235mm;margin-top:4mm;border-left:.35mm solid #e1bd78;background-image:repeating-linear-gradient(to bottom,transparent 0,transparent 8.35mm,#dce6ef 8.35mm,#dce6ef 8.55mm);background-position:0 0}
+ footer{position:absolute;left:18mm;right:15mm;bottom:7mm;display:flex;justify-content:space-between;font-size:7pt;letter-spacing:1.5px;color:#a0adba}
+ @media screen{body{padding:12px 0}.sheet{box-shadow:0 5px 25px #172b4320}}
+ @media print{html,body{background:#fff}.sheet{margin:0;box-shadow:none}}
+ </style></head><body>${pages}<script>window.onload=()=>setTimeout(()=>window.print(),450)<\/script></body></html>`);
+ printWindow.document.close();
+ $("status").textContent="สร้างกระดาษจด 5 หน้าแล้ว · เลือก Save as PDF แล้วนำเข้า Goodnotes";
+});
+show();
+</script>
+</body></html>
