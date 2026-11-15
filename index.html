@@ -83,6 +83,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .focus-close{background:#ffffff10;border:1px solid #ffffff35;padding:10px 13px;color:#eaf0f7;font-size:12px}
 .focus-subject{font-size:clamp(21px,5vw,30px);font-weight:800;margin:12px 0 6px}
 .focus-caption{font-size:11px;color:var(--gold);letter-spacing:2px;font-weight:900}
+.focus-insignia{font-size:clamp(34px,8vw,46px);line-height:1;color:#f2cf82;text-shadow:0 0 10px #e9c47755,0 2px 4px #0008;margin:0 auto 8px;letter-spacing:0}
 .focus-clock{font-size:clamp(90px,23vw,150px);font-weight:850;letter-spacing:-5px;font-variant-numeric:tabular-nums;line-height:1.15;margin:18px 0 25px}
 .focus-track{height:20px;border-radius:30px;background:#050c15;border:1px solid #46566a;overflow:hidden;box-shadow:inset 0 2px 7px #0009}
 .focus-fill{height:100%;width:100%;background:linear-gradient(90deg,#b94e5a,#df8874 55%,#f1ce87);border-radius:30px;transition:width .25s linear;box-shadow:0 0 22px #e2bd7270}
@@ -166,6 +167,7 @@ body.focus-open{overflow:hidden}
   <div class="focus-top"><span class="focus-tag">MISSION INSPECTOR · FOCUS MODE</span><button class="focus-close" id="focusClose">✕ ออกจากโหมด</button></div>
   <div class="focus-caption" id="focusCaption">STAY FOCUSED</div>
   <div class="focus-subject" id="focusSubject">ทักษะงานอำนวยการ</div>
+  <div class="focus-insignia" aria-label="เครื่องหมายดาวหนึ่งดวง">★</div>
   <div class="focus-clock-row"><div class="focus-clock" id="focusClock">25:00</div></div>
   <div class="focus-track"><div class="focus-fill" id="focusFill"></div><input class="seek-range" id="focusSeekTime" type="range" min="1" max="1500" value="1500" step="1" aria-label="เลื่อนเพื่อปรับเวลาที่เหลือใน Focus Mode"></div>
   <div class="focus-meta"><span>เวลาที่เหลือ</span><span id="focusRemain">25 นาที</span></div>
