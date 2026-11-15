@@ -84,10 +84,11 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .focus-subject{font-size:clamp(21px,5vw,30px);font-weight:800;margin:12px 0 6px}
 .focus-caption{font-size:11px;color:var(--gold);letter-spacing:2px;font-weight:900}
 .focus-insignia{position:relative;width:clamp(58px,13vw,72px);height:clamp(58px,13vw,72px);margin:0 auto 5px;display:grid;place-items:center;filter:drop-shadow(0 5px 4px #000b) drop-shadow(0 0 9px #e9c47775);isolation:isolate}
-.focus-insignia svg{width:100%;height:100%;overflow:visible;transform-origin:50% 50%;transform-style:preserve-3d;backface-visibility:visible;animation:rankSpin3D 3.8s linear infinite;filter:drop-shadow(0 2px 1px #8e5a13)}
+.focus-insignia{perspective:220px;transform-style:preserve-3d;animation:rankSpin3D 4s linear infinite}
+.focus-insignia svg{width:100%;height:100%;overflow:visible;display:block;backface-visibility:visible;filter:drop-shadow(0 2px 1px #8e5a13)}
 .focus-insignia .spin-star{transform-box:fill-box;transform-origin:center}
-@keyframes rankSpin3D{0%{transform:perspective(180px) rotateY(0deg) scaleX(1)}25%{transform:perspective(180px) rotateY(90deg) scaleX(.16)}50%{transform:perspective(180px) rotateY(180deg) scaleX(1)}75%{transform:perspective(180px) rotateY(270deg) scaleX(.16)}100%{transform:perspective(180px) rotateY(360deg) scaleX(1)}}
-@media(prefers-reduced-motion:reduce){.focus-insignia svg{animation:rankSpin3D 3.8s linear infinite}}
+@keyframes rankSpin3D{from{transform:rotateY(0deg)}to{transform:rotateY(360deg)}}
+@media(prefers-reduced-motion:reduce){.focus-insignia{animation:rankSpin3D 4s linear infinite}}
 .focus-insignia .star-body{fill:url(#rankGold);stroke:#fff0ad;stroke-width:2.2;stroke-linejoin:round}
 .focus-insignia .star-facet{fill:url(#rankFacet);opacity:.9}
 .focus-insignia .star-glint{fill:#fff8cf;filter:drop-shadow(0 0 4px #fff2a8)}
