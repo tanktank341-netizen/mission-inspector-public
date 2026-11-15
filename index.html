@@ -176,21 +176,30 @@ body.focus-open{overflow:hidden}
   <div class="focus-top"><span class="focus-tag">MISSION INSPECTOR · FOCUS MODE</span><button class="focus-close" id="focusClose">✕ ออกจากโหมด</button></div>
   <div class="focus-caption" id="focusCaption">STAY FOCUSED</div>
   <div class="focus-subject" id="focusSubject">ทักษะงานอำนวยการ</div>
-  <div class="focus-insignia" role="img" aria-label="ดาวทองหนึ่งดวง เครื่องหมายยศนายร้อยตำรวจ">
-   <svg viewBox="0 0 100 100" aria-hidden="true">
+  <div class="focus-insignia" role="img" aria-label="ดาวทองหนึ่งดวง ประกายระยิบระยับ เครื่องหมายยศนายร้อยตำรวจ">
+   <svg viewBox="0 0 120 112" aria-hidden="true">
     <defs>
-     <linearGradient id="rankGold" x1="12%" y1="5%" x2="88%" y2="95%"><stop offset="0" stop-color="#fff8c9"/><stop offset=".2" stop-color="#f8df83"/><stop offset=".48" stop-color="#c58a25"/><stop offset=".7" stop-color="#ffe9a0"/><stop offset="1" stop-color="#8e5a13"/></linearGradient>
+     <linearGradient id="rankGold" x1="12%" y1="5%" x2="88%" y2="95%"><stop offset="0" stop-color="#fffde0"/><stop offset=".2" stop-color="#f8df83"/><stop offset=".48" stop-color="#c58a25"/><stop offset=".7" stop-color="#ffe9a0"/><stop offset="1" stop-color="#8e5a13"/></linearGradient>
      <linearGradient id="rankFacet" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fffde0"/><stop offset=".52" stop-color="#f4c95b"/><stop offset="1" stop-color="#a66a18"/></linearGradient>
+     <filter id="sparkGlow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="2.2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
     </defs>
-    <polygon class="star-body" points="50,5 61,36 94,37 68,57 77,90 50,71 23,90 32,57 6,37 39,36"/>
-    <polygon class="star-facet" points="50,5 50,49 39,36"/>
-    <polygon class="star-facet" points="50,5 61,36 50,49"/>
-    <polygon class="star-facet" points="94,37 50,49 68,57"/>
-    <polygon class="star-facet" points="77,90 50,49 50,71"/>
-    <polygon class="star-facet" points="23,90 50,49 32,57"/>
-    <polygon class="star-facet" points="6,37 50,49 39,36"/>
-    <path class="star-glint" d="M18 35 Q28 28 39 32 Q29 34 24 42 Q23 36 18 35Z"/>
-    <path class="star-glint" d="M53 13 L56 25 L68 28 L56 31 L53 43 L50 31 L38 28 L50 25Z" opacity=".75"/>
+    <g fill="#fff4b5" filter="url(#sparkGlow)">
+     <path d="M15 21 Q18 31 28 34 Q18 37 15 47 Q12 37 2 34 Q12 31 15 21Z"><animate attributeName="opacity" values=".25;1;.25" dur="1.7s" repeatCount="indefinite"/><animateTransform attributeName="transform" type="scale" values=".72  .72;1.12 1.12;.72 .72" dur="1.7s" repeatCount="indefinite" additive="sum"/></path>
+     <path d="M102 12 Q105 21 114 24 Q105 27 102 36 Q99 27 90 24 Q99 21 102 12Z"><animate attributeName="opacity" values="1;.2;1" dur="2.1s" repeatCount="indefinite"/></path>
+     <path d="M108 76 Q110 83 117 85 Q110 88 108 95 Q105 88 98 85 Q105 83 108 76Z"><animate attributeName="opacity" values=".2;1;.2" dur="1.4s" repeatCount="indefinite"/></path>
+     <circle cx="19" cy="83" r="2.3"><animate attributeName="opacity" values=".15;1;.15" dur="1.3s" repeatCount="indefinite"/></circle>
+     <circle cx="93" cy="52" r="1.8"><animate attributeName="opacity" values="1;.15;1" dur="1.8s" repeatCount="indefinite"/></circle>
+    </g>
+    <polygon class="star-body" points="60,9 71,40 104,41 78,61 87,94 60,75 33,94 42,61 16,41 49,40"/>
+    <polygon class="star-facet" points="60,9 60,53 49,40"/>
+    <polygon class="star-facet" points="60,9 71,40 60,53"/>
+    <polygon class="star-facet" points="104,41 60,53 78,61"/>
+    <polygon class="star-facet" points="87,94 60,53 60,75"/>
+    <polygon class="star-facet" points="33,94 60,53 42,61"/>
+    <polygon class="star-facet" points="16,41 60,53 49,40"/>
+    <path class="star-glint" d="M28 39 Q38 31 49 36 Q39 38 34 46 Q33 40 28 39Z"/>
+    <path class="star-glint" d="M63 17 L66 29 L78 32 L66 35 L63 47 L60 35 L48 32 L60 29Z" opacity=".9"/>
+    <path d="M7 59 L10 66 L17 69 L10 72 L7 79 L4 72 L-3 69 L4 66Z" fill="#fff9d8" filter="url(#sparkGlow)"><animate attributeName="opacity" values=".15;1;.15" dur="2s" repeatCount="indefinite"/></path>
    </svg>
   </div>
   <div class="focus-clock-row"><div class="focus-clock" id="focusClock">25:00</div></div>
