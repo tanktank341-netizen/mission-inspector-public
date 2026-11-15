@@ -84,10 +84,10 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .focus-subject{font-size:clamp(21px,5vw,30px);font-weight:800;margin:12px 0 6px}
 .focus-caption{font-size:11px;color:var(--gold);letter-spacing:2px;font-weight:900}
 .focus-insignia{position:relative;width:clamp(58px,13vw,72px);height:clamp(58px,13vw,72px);margin:0 auto 5px;display:grid;place-items:center;filter:drop-shadow(0 5px 4px #000b) drop-shadow(0 0 9px #e9c47775);isolation:isolate}
-.focus-insignia svg{width:100%;height:100%;overflow:visible;perspective:260px}
-.focus-insignia .spin-star{transform-box:fill-box;transform-origin:center;transform-style:preserve-3d;animation:rankSpin 5s linear infinite}
-@keyframes rankSpin{from{transform:perspective(260px) rotateY(0deg)}to{transform:perspective(260px) rotateY(360deg)}}
-@media(prefers-reduced-motion:reduce){.focus-insignia .spin-star{animation:rankSpin 9s linear infinite}}
+.focus-insignia svg{width:100%;height:100%;overflow:visible;transform-origin:50% 50%;transform-style:preserve-3d;backface-visibility:visible;animation:rankSpin3D 3.8s linear infinite;filter:drop-shadow(0 2px 1px #8e5a13)}
+.focus-insignia .spin-star{transform-box:fill-box;transform-origin:center}
+@keyframes rankSpin3D{0%{transform:perspective(180px) rotateY(0deg) scaleX(1)}25%{transform:perspective(180px) rotateY(90deg) scaleX(.16)}50%{transform:perspective(180px) rotateY(180deg) scaleX(1)}75%{transform:perspective(180px) rotateY(270deg) scaleX(.16)}100%{transform:perspective(180px) rotateY(360deg) scaleX(1)}}
+@media(prefers-reduced-motion:reduce){.focus-insignia svg{animation:rankSpin3D 3.8s linear infinite}}
 .focus-insignia .star-body{fill:url(#rankGold);stroke:#fff0ad;stroke-width:2.2;stroke-linejoin:round}
 .focus-insignia .star-facet{fill:url(#rankFacet);opacity:.9}
 .focus-insignia .star-glint{fill:#fff8cf;filter:drop-shadow(0 0 4px #fff2a8)}
@@ -177,8 +177,6 @@ body.focus-open{overflow:hidden}
 <div class="focus-overlay" id="focusOverlay" role="dialog" aria-modal="true" aria-label="Focus Mode">
  <div class="focus-inner">
   <div class="focus-top"><span class="focus-tag">MISSION INSPECTOR · FOCUS MODE</span><button class="focus-close" id="focusClose">✕ ออกจากโหมด</button></div>
-  <div class="focus-caption" id="focusCaption">STAY FOCUSED</div>
-  <div class="focus-subject" id="focusSubject">ทักษะงานอำนวยการ</div>
   <div class="focus-insignia" role="img" aria-label="ดาวทองหนึ่งดวง ประกายระยิบระยับ เครื่องหมายยศนายร้อยตำรวจ">
    <svg viewBox="0 0 120 112" aria-hidden="true">
     <defs>
@@ -207,6 +205,8 @@ body.focus-open{overflow:hidden}
     <path d="M7 59 L10 66 L17 69 L10 72 L7 79 L4 72 L-3 69 L4 66Z" fill="#fff9d8" filter="url(#sparkGlow)"><animate attributeName="opacity" values=".15;1;.15" dur="2s" repeatCount="indefinite"/></path>
    </svg>
   </div>
+  <div class="focus-caption" id="focusCaption">STAY FOCUSED</div>
+  <div class="focus-subject" id="focusSubject">ทักษะงานอำนวยการ</div>
   <div class="focus-clock-row"><div class="focus-clock" id="focusClock">25:00</div></div>
   <div class="focus-track"><div class="focus-fill" id="focusFill"></div><input class="seek-range" id="focusSeekTime" type="range" min="1" max="1500" value="1500" step="1" aria-label="เลื่อนเพื่อปรับเวลาที่เหลือใน Focus Mode"></div>
   <div class="focus-meta"><span>เวลาที่เหลือ</span><span id="focusRemain">25 นาที</span></div>
