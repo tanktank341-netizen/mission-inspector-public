@@ -53,6 +53,12 @@ to{-webkit-transform:rotate(360deg)}}
 .focus-clock-row .focus-clock{margin:0}
 
 .track{height:18px;border-radius:30px;background:#081321;border:1px solid #354a61;overflow:hidden;box-shadow:inset 0 2px 6px #0008}
+.track,.focus-track{position:relative;touch-action:pan-y}
+.seek-range{position:absolute;inset:0;width:100%;height:100%;margin:0;z-index:2;appearance:none;-webkit-appearance:none;background:transparent;border:0;border-radius:30px;cursor:ew-resize;touch-action:pan-y}
+.seek-range::-webkit-slider-runnable-track{height:100%;background:transparent}
+.seek-range::-moz-range-track{height:100%;background:transparent}
+.seek-range::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:17px;height:17px;border-radius:50%;background:#fff2c9;border:3px solid #c99b50;box-shadow:0 1px 6px #0009}
+.seek-range::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:#fff2c9;border:3px solid #c99b50;box-shadow:0 1px 6px #0009}
 .fill{height:100%;width:100%;border-radius:30px;background:linear-gradient(90deg,#bd515e,#e88a76 55%,#f0c77c);box-shadow:0 0 16px #e36b7270;transition:width .25s linear;position:relative}
 .fill:after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 25%,#ffffff55 48%,transparent 68%);animation:flow 2.5s linear infinite}
 @keyframes flow{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
@@ -138,7 +144,7 @@ body.focus-open{overflow:hidden}
   <section class="timerbox" aria-label="ตัวจับเวลาอ่านหนังสือ">
    <div class="timer-caption" id="timerCaption">FOCUS SESSION</div>
    <div class="clock-row"><div class="clock" id="clock">25:00</div></div>
-   <div class="track" role="progressbar" aria-label="เวลาที่เหลือ" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><div class="fill" id="fill"></div></div>
+   <div class="track" aria-label="แถบปรับเวลาที่เหลือ"><div class="fill" id="fill"></div><input class="seek-range" id="seekTime" type="range" min="1" max="1500" value="1500" step="1" aria-label="เลื่อนเพื่อปรับเวลาที่เหลือ"></div>
    <div class="remaining"><span>เริ่มต้น</span><span id="remainText">เหลือ 25 นาที</span></div>
    <div class="controls">
     <button class="primary" id="start">▶ เริ่มอ่าน</button>
@@ -161,7 +167,7 @@ body.focus-open{overflow:hidden}
   <div class="focus-caption" id="focusCaption">STAY FOCUSED</div>
   <div class="focus-subject" id="focusSubject">ทักษะงานอำนวยการ</div>
   <div class="focus-clock-row"><div class="focus-clock" id="focusClock">25:00</div></div>
-  <div class="focus-track"><div class="focus-fill" id="focusFill"></div></div>
+  <div class="focus-track"><div class="focus-fill" id="focusFill"></div><input class="seek-range" id="focusSeekTime" type="range" min="1" max="1500" value="1500" step="1" aria-label="เลื่อนเพื่อปรับเวลาที่เหลือใน Focus Mode"></div>
   <div class="focus-meta"><span>เวลาที่เหลือ</span><span id="focusRemain">25 นาที</span></div>
   <div class="focus-controls"><button class="primary" id="focusStart">▶ เริ่มอ่าน</button><button id="focusPause">Ⅱ พัก</button><button id="focusReset">↺ เริ่มใหม่</button></div>
   <button class="focus-rest" id="focusRestStart">☕ พัก 5 นาที</button>
@@ -211,7 +217,8 @@ function show(){
  const pct=duration?remaining/duration*100:0;
  $("clock").textContent=time;
  $("fill").style.width=pct+"%";
- $("fill").parentElement.setAttribute("aria-valuenow",String(Math.round(pct)));
+ $("seekTime").max=String(duration);$("seekTime").value=String(Math.max(1,remaining));
+ $("focusSeekTime").max=String(duration);$("focusSeekTime").value=String(Math.max(1,remaining));
  const remain="เหลือ "+(remaining%60?Math.ceil(remaining/60):remaining/60)+" นาที";
  $("remainText").textContent=remain;
  $("lengthText").textContent=minutes+" นาที";
@@ -278,6 +285,15 @@ function startTimer(){
  $("status").textContent=timerMode==="break"?(breakKind==="long"?"กำลังพักยาว 30 นาที ☕":"กำลังพัก 5 นาที ☕"):"กำลังอ่าน: "+$("subject").value;
  show();
 }
+function seekTimer(value){
+ const next=Math.min(duration,Math.max(1,Number(value)||1));
+ remaining=next;
+ if(interval)endAt=Date.now()+remaining*1000;
+ show();
+ $("status").textContent="ปรับเวลาเหลือ "+Math.ceil(remaining/60)+" นาทีแล้ว";
+}
+$("seekTime").addEventListener("input",e=>seekTimer(e.target.value));
+$("focusSeekTime").addEventListener("input",e=>seekTimer(e.target.value));
 $("start").addEventListener("click",startTimer);
 function startBreak(){
  if(interval||!breakAvailable)return;
