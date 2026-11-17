@@ -586,10 +586,17 @@ show();
  if(dutyViewMonth>new Date(2027,11,1))dutyViewMonth=new Date(2027,11,1);
  const backupPrefix="missionInspector";
  function exportMissionBackup(){
-  const data={};
+  // อ่านจาก state ที่แอปใช้งานอยู่โดยตรง ไม่พึ่งการวนหา localStorage อย่างเดียว
+  const data={
+   "missionInspectorCalendarMissionsV1":JSON.stringify(calendarMissions||{}),
+   "missionInspectorGoldShopVisitsV1":JSON.stringify(goldShopVisits||{}),
+   "missionInspectorGoldShopVisitTypesV1":JSON.stringify(goldShopVisitTypes||{}),
+   "missionInspectorDutyRestOverridesV1":JSON.stringify(dutyRestOverrides||{})
+  };
+  // รวมคีย์อื่นของแอปที่อาจมีในอุปกรณ์ด้วย
   for(let i=0;i<localStorage.length;i++){
    const key=localStorage.key(i);
-   if(key&&key.startsWith(backupPrefix))data[key]=localStorage.getItem(key);
+   if(key&&key.startsWith(backupPrefix)&&!(key in data))data[key]=localStorage.getItem(key);
   }
   const backup={app:"MISSION_INSPECTOR",formatVersion:1,createdAt:new Date().toISOString(),data};
   const blob=new Blob([JSON.stringify(backup,null,2)],{type:"application/json"});
@@ -597,7 +604,8 @@ show();
   link.href=url;link.download="mission-inspector-backup-"+new Date().toISOString().slice(0,10)+".json";
   document.body.appendChild(link);link.click();link.remove();
   setTimeout(()=>URL.revokeObjectURL(url),1500);
-  alert("สร้างไฟล์สำรองข้อมูลแล้ว กรุณาตรวจสอบไฟล์ในแอป Files");
+  const recordCount=Object.values(calendarMissions||{}).length+Object.values(goldShopVisits||{}).length+Object.values(dutyRestOverrides||{}).length;
+  alert("สร้างไฟล์สำรองแล้ว ("+recordCount+" รายการภารกิจ/ร้านทอง/ปรับเวร) กรุณาตรวจสอบไฟล์ในแอป Files");
  }
  function restoreMissionBackup(file){
   const reader=new FileReader();
