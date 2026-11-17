@@ -186,6 +186,11 @@ body.focus-open{overflow:hidden}
 .duty-shop-options .shop-current{background:#f0cb65;color:#30240d;border-color:#f0cb65}
 .duty-shop-options .shop-remove{background:#243a53;border-color:#60748a;color:#f4f7fb}
 .duty-shop-note{font-size:10px;color:#91a2b7;margin-top:8px;line-height:1.5}
+.duty-shop-type-options{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px}
+.duty-shop-type-options button{flex:1;min-width:120px;padding:11px 9px;background:#243a53;border:1px solid #b78d48;color:#ffe6a8}
+.duty-shop-type-options button.shop-type-current{background:#f0cb65;color:#30240d}
+.duty-shop-detail-popup{margin:10px 0;padding:10px 12px;border:1px solid #b78d48;border-radius:11px;background:#1c2d43;color:#ffe6a8;font-size:12px;box-shadow:0 5px 18px #0005}
+.duty-shop-detail-popup b{display:block;color:#f0d27f;margin-bottom:4px}
 
 .duty-footnote{font-size:10px;color:#71839a;text-align:center;line-height:1.6;margin:13px 4px}
 .duty-cal-nav button:disabled{opacity:.35}
@@ -519,6 +524,10 @@ show();
   return (name||"").includes("ลา")?"mission-leave":"mission-work";
  }
  const goldShopStorageKey="missionInspectorGoldShopVisitsV1";
+ const goldShopTypeStorageKey="missionInspectorGoldShopVisitTypesV1";
+ let goldShopVisitTypes={};
+ try{goldShopVisitTypes=JSON.parse(localStorage.getItem(goldShopTypeStorageKey)||"{}")||{};}catch(e){goldShopVisitTypes={};}
+ function saveGoldShopVisitTypes(){try{localStorage.setItem(goldShopTypeStorageKey,JSON.stringify(goldShopVisitTypes));}catch(e){alert("ไม่สามารถบันทึกรายละเอียดร้านทองในอุปกรณ์นี้ได้");}}
  let goldShopVisits={};
  try{goldShopVisits=JSON.parse(localStorage.getItem(goldShopStorageKey)||"{}")||{};}catch(e){goldShopVisits={};}
  function saveGoldShopVisits(){try{localStorage.setItem(goldShopStorageKey,JSON.stringify(goldShopVisits));}catch(e){alert("ไม่สามารถบันทึกข้อมูลร้านทองในอุปกรณ์นี้ได้");}}
@@ -600,12 +609,17 @@ show();
    '<div class="duty-edit-actions"><button type="button" class="gold-entry" id="saveMissionName">บันทึกภารกิจ</button>'+(currentMission?'<button type="button" class="remove-rest" id="deleteMissionName">ลบภารกิจ</button>':'')+'</div>'+
    '<div class="duty-shop-note">สีแดง = ทุกวันยกเว้นพักวันที่ 1, พักวันที่ 2 และวันลา · สีเหลือง = วันลาที่บันทึกคำว่า “ลา”</div>';
   const currentShop=goldShopVisits[selectedKey]||"";
+  const currentShopType=goldShopVisitTypes[selectedKey]||"";
+  const shopTypePanel=currentShop?'<div class="duty-shop-note">เลือกลักษณะการเข้าร้านทอง</div><div class="duty-shop-type-options">'+
+   '<button type="button" id="shopTypeHired" '+(currentShopType==="รับจ้าง"?'class="shop-type-current"':'')+'>รับจ้าง</button>'+
+   '<button type="button" id="shopTypeOwnDuty" '+(currentShopType==="เวรตัวเอง"?'class="shop-type-current"':'')+'>เวรตัวเอง</button></div>':'';
+  const shopDetailPopup=(currentShop&&currentShopType)?'<div class="duty-shop-detail-popup"><b>รายละเอียดร้านทอง</b>🏪 '+currentShop+' · '+currentShopType+'</div>':'';
   const shopPanel='<div class="duty-edit-actions"><button type="button" class="gold-entry" id="toggleGoldShop">🏪 '+(currentShop?'เปลี่ยน / จัดการร้านทอง':'เข้าร้านทอง')+'</button></div>'+
    '<div id="goldShopChoices" style="display:'+(currentShop?'flex':'none')+'" class="duty-shop-options">'+
    '<button type="button" id="chooseThaiPrayoon" '+(currentShop==="ไทยประยูร"?'class="shop-current"':'')+'>ไทยประยูร</button>'+
    '<button type="button" id="chooseSereewat" '+(currentShop==="เสรีวัฒน์"?'class="shop-current"':'')+'>เสรีวัฒน์</button>'+
    (currentShop?'<button type="button" class="shop-remove" id="removeGoldShop">ลบรายการร้านทอง</button>':'')+
-   '</div><div class="duty-shop-note">'+(currentShop?'วันที่เลือกบันทึกว่าเข้าร้าน '+currentShop+' · เลือกร้านใหม่เพื่อแก้ไข หรือกดลบรายการ':'เลือกวันที่ แล้วกดเข้าร้านทองเพื่อเลือกร้านที่ไป')+'</div>';
+   '</div>'+shopTypePanel+shopDetailPopup+'<div class="duty-shop-note">'+(currentShop?'วันที่เลือกบันทึกว่าเข้าร้าน '+currentShop+' · เลือกร้านใหม่เพื่อแก้ไข หรือกดลบรายการ':'เลือกวันที่ แล้วกดเข้าร้านทองเพื่อเลือกร้านที่ไป')+'</div>';
   byId("dutySelected").innerHTML='<h3>'+dutyThaiDate(dutySelected)+' · วัน'+dayNames[dutySelected.getDay()]+'</h3><p><b style="color:'+colors[selectedState.kind]+'">'+selectedState.label+'</b></p><p>'+selectedState.detail+'</p>'+actions+missionPanel+shopPanel;
   const missionInput=byId("missionNameInput"),saveMission=byId("saveMissionName"),deleteMission=byId("deleteMissionName");
   if(saveMission)saveMission.addEventListener("click",()=>{const value=missionInput.value.trim();if(!value){alert("กรุณากรอกชื่อภารกิจ");return;}calendarMissions[selectedKey]=value;saveCalendarMissions();renderDuty();});
@@ -617,11 +631,15 @@ show();
   if(resetBtn)resetBtn.addEventListener("click",()=>{delete dutyRestOverrides[selectedKey];saveDutyOverrides();renderDuty();});
   const shopToggle=byId("toggleGoldShop"),shopChoices=byId("goldShopChoices");
   if(shopToggle)shopToggle.addEventListener("click",()=>{shopChoices.style.display=shopChoices.style.display==="none"?"flex":"none";});
-  const chooseShop=(name)=>{goldShopVisits[selectedKey]=name;saveGoldShopVisits();renderDuty();};
+  const chooseShop=(name)=>{goldShopVisits[selectedKey]=name;delete goldShopVisitTypes[selectedKey];saveGoldShopVisits();saveGoldShopVisitTypes();renderDuty();};
   const thaiShop=byId("chooseThaiPrayoon"),sereeShop=byId("chooseSereewat"),removeShop=byId("removeGoldShop");
+  const hiredType=byId("shopTypeHired"),ownDutyType=byId("shopTypeOwnDuty");
+  const chooseShopType=(type)=>{goldShopVisitTypes[selectedKey]=type;saveGoldShopVisitTypes();renderDuty();};
+  if(hiredType)hiredType.addEventListener("click",()=>chooseShopType("รับจ้าง"));
+  if(ownDutyType)ownDutyType.addEventListener("click",()=>chooseShopType("เวรตัวเอง"));
   if(thaiShop)thaiShop.addEventListener("click",()=>chooseShop("ไทยประยูร"));
   if(sereeShop)sereeShop.addEventListener("click",()=>chooseShop("เสรีวัฒน์"));
-  if(removeShop)removeShop.addEventListener("click",()=>{delete goldShopVisits[selectedKey];saveGoldShopVisits();renderDuty();});
+  if(removeShop)removeShop.addEventListener("click",()=>{delete goldShopVisits[selectedKey];delete goldShopVisitTypes[selectedKey];saveGoldShopVisits();saveGoldShopVisitTypes();renderDuty();});
   byId("dutyPrev").disabled=(y===2026&&m===3);byId("dutyNext").disabled=(y===2027&&m===11);
  }
  byId("dutyPrev").addEventListener("click",()=>{dutyViewMonth.setMonth(dutyViewMonth.getMonth()-1);renderDuty();});
