@@ -168,6 +168,12 @@ body.focus-open{overflow:hidden}
 .duty-selected{background:#111e30;border:1px solid #293b51;border-radius:15px;padding:13px;margin-top:12px}
 .duty-selected h3{font-size:14px;margin:0 0 7px}
 .duty-selected p{font-size:12px;color:#b8c6d9;margin:5px 0}
+.duty-edit-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.duty-edit-actions button{flex:1;min-width:130px;padding:11px 10px;font-size:11px}
+.duty-edit-actions .add-rest{background:linear-gradient(135deg,#f0d27f,#d8ad60);border:0;color:#17283d}
+.duty-edit-actions .remove-rest{background:#243a53;border-color:#60748a;color:#f4f7fb}
+.duty-edit-note{font-size:10px;color:#91a2b7;margin-top:9px;line-height:1.5}
+
 .duty-footnote{font-size:10px;color:#71839a;text-align:center;line-height:1.6;margin:13px 4px}
 .duty-cal-nav button:disabled{opacity:.35}
 @media(max-width:390px){.duty-day{min-height:49px}.duty-day .duty-num{font-size:12px}.duty-day .duty-tag{font-size:7px}.duty-stats{gap:6px}.duty-stat{padding:10px 7px}.duty-stat strong{font-size:19px}}
@@ -492,19 +498,30 @@ show();
  const byId=id=>document.getElementById(id);
  const dateOnly=d=>new Date(d.getFullYear(),d.getMonth(),d.getDate());
  const dayDiff=(a,b)=>Math.round((dateOnly(a)-dateOnly(b))/86400000);
+ const overrideStorageKey="missionInspectorDutyRestOverridesV1";
+ let dutyRestOverrides={};
+ try{dutyRestOverrides=JSON.parse(localStorage.getItem(overrideStorageKey)||"{}")||{};}catch(e){dutyRestOverrides={};}
+ const dateKey=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+ function saveDutyOverrides(){try{localStorage.setItem(overrideStorageKey,JSON.stringify(dutyRestOverrides));}catch(e){alert("ไม่สามารถบันทึกข้อมูลในอุปกรณ์นี้ได้");}}
  let dutyViewMonth=new Date();dutyViewMonth.setDate(1);
  let dutySelected=dateOnly(new Date());
  if(dutySelected<startDate)dutySelected=new Date(startDate);
  if(dutySelected>endDate)dutySelected=new Date(endDate);
  if(dutyViewMonth<new Date(2026,3,1))dutyViewMonth=new Date(2026,3,1);
  if(dutyViewMonth>new Date(2027,11,1))dutyViewMonth=new Date(2027,11,1);
- function dutyState(d){
+ function baseDutyState(d){
   const n=dayDiff(d,startDate);
   if(n<0||dateOnly(d)>endDate)return {kind:"outside",label:"นอกช่วงตาราง",detail:"ไม่มีข้อมูลในช่วงที่กำหนด"};
   const r=((n%3)+3)%3;
   if(r===0)return {kind:"work",label:"เข้าเวร 24 ชั่วโมง",detail:"08:00 น. – 08:00 น. ของวันถัดไป"};
   if(r===1)return {kind:"rest1",label:"พักวันแรก",detail:"วันพักหลังเข้าเวร"};
   return {kind:"rest2",label:"พักวันที่สอง",detail:"วันพักวันที่สอง ก่อนเริ่มรอบใหม่"};
+ }
+ function dutyState(d){
+  const base=baseDutyState(d),key=dateKey(d);
+  if(base.kind==="outside")return base;
+  if(dutyRestOverrides[key])return {kind:"rest1",label:"วันพักพิเศษ",detail:"วันพักที่เพิ่มเอง · ไม่เปลี่ยนรอบเวรปกติ",custom:true};
+  return base;
  }
  function dutyThaiDate(d){return d.getDate()+" "+monthNames[d.getMonth()]+" "+(d.getFullYear()+543)}
  function renderDuty(){
@@ -514,7 +531,7 @@ show();
   byId("dutyTodayStatus").innerHTML='<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:'+colors[todayState.kind]+';margin-right:8px"></span>'+todayState.label;
   byId("dutyTodayDetail").textContent=todayState.detail;
   let nextDays=null,nextDate=null;
-  for(let i=0;i<=3;i++){const d=new Date(today);d.setDate(d.getDate()+i);if(dutyState(d).kind==="work"){nextDays=i;nextDate=d;break;}}
+  for(let i=0;i<=365;i++){const d=new Date(today);d.setDate(d.getDate()+i);if(dutyState(d).kind==="work"){nextDays=i;nextDate=d;break;}}
   byId("dutyCountdown").textContent=todayState.kind==="work"?"วันนี้เป็นวันเข้าเวรของมึงแล้ว":nextDate?(nextDays===0?"วันนี้มีเวร":"อีก "+nextDays+" วัน จะเข้าเวรครั้งถัดไป · "+dutyThaiDate(nextDate)):"ไม่มีเวรถัดไปในช่วงตาราง";
   const y=dutyViewMonth.getFullYear(),m=dutyViewMonth.getMonth();
   byId("dutyMonthTitle").textContent=monthNames[m]+" "+(y+543);
@@ -535,8 +552,13 @@ show();
   }
   byId("dutyWorkCount").textContent=workCount;byId("dutyRestCount").textContent=restCount;
   byId("dutyNextCount").textContent=nextDate?nextDays+" วัน":"—";
-  const selectedState=dutyState(dutySelected);
-  byId("dutySelected").innerHTML='<h3>'+dutyThaiDate(dutySelected)+' · วัน'+dayNames[dutySelected.getDay()]+'</h3><p><b style="color:'+colors[selectedState.kind]+'">'+selectedState.label+'</b></p><p>'+selectedState.detail+'</p>';
+  const selectedState=dutyState(dutySelected),selectedKey=dateKey(dutySelected),isCustomRest=!!dutyRestOverrides[selectedKey];
+  const canEdit=selectedState.kind!=="outside";
+  byId("dutySelected").innerHTML='<h3>'+dutyThaiDate(dutySelected)+' · วัน'+dayNames[dutySelected.getDay()]+'</h3><p><b style="color:'+colors[selectedState.kind]+'">'+selectedState.label+'</b></p><p>'+selectedState.detail+'</p>'+
+   (canEdit?'<div class="duty-edit-actions">'+(isCustomRest?'<button type="button" class="remove-rest" id="removeDutyRest">↶ ยกเลิกวันพักพิเศษ</button>':'<button type="button" class="add-rest" id="addDutyRest">＋ เพิ่มเป็นวันพัก</button>')+'</div><div class="duty-edit-note">เลือกวันที่บนปฏิทิน แล้วกดเพิ่มหรือยกเลิกวันพักได้ · การแก้ไขมีผลเฉพาะวันที่เลือก และไม่เลื่อนรอบเวรปกติ</div>':'');
+  const addRest=byId("addDutyRest"),removeRest=byId("removeDutyRest");
+  if(addRest)addRest.addEventListener("click",()=>{dutyRestOverrides[selectedKey]=true;saveDutyOverrides();renderDuty();});
+  if(removeRest)removeRest.addEventListener("click",()=>{delete dutyRestOverrides[selectedKey];saveDutyOverrides();renderDuty();});
   byId("dutyPrev").disabled=(y===2026&&m===3);byId("dutyNext").disabled=(y===2027&&m===11);
  }
  byId("dutyPrev").addEventListener("click",()=>{dutyViewMonth.setMonth(dutyViewMonth.getMonth()-1);renderDuty();});
