@@ -170,8 +170,11 @@ body.focus-open{overflow:hidden}
 .duty-selected p{font-size:12px;color:#b8c6d9;margin:5px 0}
 .duty-edit-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 .duty-edit-actions button{flex:1;min-width:130px;padding:11px 10px;font-size:11px}
-.duty-edit-actions .add-rest{background:linear-gradient(135deg,#f0d27f,#d8ad60);border:0;color:#17283d}
+.duty-edit-actions .set-work{background:#e36b72;border:0;color:#25151a}
+.duty-edit-actions .set-rest1{background:#f0cb65;border:0;color:#30240d}
+.duty-edit-actions .set-rest2{background:#62c39c;border:0;color:#102b25}
 .duty-edit-actions .remove-rest{background:#243a53;border-color:#60748a;color:#f4f7fb}
+.duty-edit-actions button:disabled{opacity:.38;cursor:not-allowed}
 .duty-edit-note{font-size:10px;color:#91a2b7;margin-top:9px;line-height:1.5}
 
 .duty-footnote{font-size:10px;color:#71839a;text-align:center;line-height:1.6;margin:13px 4px}
@@ -520,7 +523,12 @@ show();
  function dutyState(d){
   const base=baseDutyState(d),key=dateKey(d);
   if(base.kind==="outside")return base;
-  if(dutyRestOverrides[key])return {kind:"rest1",label:"วันพักพิเศษ",detail:"วันพักที่เพิ่มเอง · ไม่เปลี่ยนรอบเวรปกติ",custom:true};
+  const override=dutyRestOverrides[key];
+  if(override){
+   const kind=override===true?"rest1":override;
+   const labels={work:["เข้าเวร 24 ชั่วโมง","08:00 น. – 08:00 น. ของวันถัดไป"],rest1:["พักวันแรก","วันพักหลังเข้าเวร"],rest2:["พักวันที่สอง","วันพักวันที่สอง ก่อนเริ่มรอบใหม่"]};
+   if(labels[kind])return {kind,label:labels[kind][0],detail:labels[kind][1]+" · กำหนดเอง",custom:true};
+  }
   return base;
  }
  function dutyThaiDate(d){return d.getDate()+" "+monthNames[d.getMonth()]+" "+(d.getFullYear()+543)}
@@ -552,13 +560,21 @@ show();
   }
   byId("dutyWorkCount").textContent=workCount;byId("dutyRestCount").textContent=restCount;
   byId("dutyNextCount").textContent=nextDate?nextDays+" วัน":"—";
-  const selectedState=dutyState(dutySelected),selectedKey=dateKey(dutySelected),isCustomRest=!!dutyRestOverrides[selectedKey];
+  const selectedState=dutyState(dutySelected),selectedKey=dateKey(dutySelected),hasOverride=!!dutyRestOverrides[selectedKey];
   const canEdit=selectedState.kind!=="outside";
-  byId("dutySelected").innerHTML='<h3>'+dutyThaiDate(dutySelected)+' · วัน'+dayNames[dutySelected.getDay()]+'</h3><p><b style="color:'+colors[selectedState.kind]+'">'+selectedState.label+'</b></p><p>'+selectedState.detail+'</p>'+
-   (canEdit?'<div class="duty-edit-actions">'+(isCustomRest?'<button type="button" class="remove-rest" id="removeDutyRest">↶ ยกเลิกวันพักพิเศษ</button>':'<button type="button" class="add-rest" id="addDutyRest">＋ เพิ่มเป็นวันพัก</button>')+'</div><div class="duty-edit-note">เลือกวันที่บนปฏิทิน แล้วกดเพิ่มหรือยกเลิกวันพักได้ · การแก้ไขมีผลเฉพาะวันที่เลือก และไม่เลื่อนรอบเวรปกติ</div>':'');
-  const addRest=byId("addDutyRest"),removeRest=byId("removeDutyRest");
-  if(addRest)addRest.addEventListener("click",()=>{dutyRestOverrides[selectedKey]=true;saveDutyOverrides();renderDuty();});
-  if(removeRest)removeRest.addEventListener("click",()=>{delete dutyRestOverrides[selectedKey];saveDutyOverrides();renderDuty();});
+  const actions=canEdit?'<div class="duty-edit-actions">'+
+   '<button type="button" class="set-work" id="setDutyWork">🔴 กำหนดเป็นวันเข้าเวร</button>'+
+   '<button type="button" class="set-rest1" id="setDutyRest1">🟡 กำหนดเป็นวันพัก 1</button>'+
+   '<button type="button" class="set-rest2" id="setDutyRest2">🟢 กำหนดเป็นวันพัก 2</button>'+
+   '<button type="button" class="remove-rest" id="resetDutyDay" '+(hasOverride?'':'disabled')+'>↶ คืนค่าตารางเวรเดิม</button>'+
+   '</div><div class="duty-edit-note">เลือกประเภทวันเพื่อเพิ่มหรือแก้ไขได้ทันที · ปุ่มคืนค่าจะลบการแก้ไขเฉพาะวันที่เลือก และกลับไปใช้รอบเวรปกติ</div>':'';
+  byId("dutySelected").innerHTML='<h3>'+dutyThaiDate(dutySelected)+' · วัน'+dayNames[dutySelected.getDay()]+'</h3><p><b style="color:'+colors[selectedState.kind]+'">'+selectedState.label+'</b></p><p>'+selectedState.detail+'</p>'+actions;
+  const setDay=(kind)=>{dutyRestOverrides[selectedKey]=kind;saveDutyOverrides();renderDuty();};
+  const workBtn=byId("setDutyWork"),rest1Btn=byId("setDutyRest1"),rest2Btn=byId("setDutyRest2"),resetBtn=byId("resetDutyDay");
+  if(workBtn)workBtn.addEventListener("click",()=>setDay("work"));
+  if(rest1Btn)rest1Btn.addEventListener("click",()=>setDay("rest1"));
+  if(rest2Btn)rest2Btn.addEventListener("click",()=>setDay("rest2"));
+  if(resetBtn)resetBtn.addEventListener("click",()=>{delete dutyRestOverrides[selectedKey];saveDutyOverrides();renderDuty();});
   byId("dutyPrev").disabled=(y===2026&&m===3);byId("dutyNext").disabled=(y===2027&&m===11);
  }
  byId("dutyPrev").addEventListener("click",()=>{dutyViewMonth.setMonth(dutyViewMonth.getMonth()-1);renderDuty();});
