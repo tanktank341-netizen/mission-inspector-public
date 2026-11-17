@@ -221,11 +221,15 @@ body.focus-open{overflow:hidden}
 .action-group p{margin-top:12px!important}
 .backup-panel{padding:10px}
 .backup-panel .action-group{margin:0}
+.top{gap:12px}
+.app-update-btn{flex:0 0 auto;padding:9px 12px;border:1px solid #8d7449;border-radius:11px;background:#172840;color:#f1d28e;font-size:11px;font-weight:800;white-space:nowrap}
+.app-update-btn:disabled{opacity:.65}
+.app-update-btn.updating{border-color:#67c69b;color:#a9e5d2}
 </style>
 </head>
 <body>
 <div class="shell">
- <div class="top"><div class="brand">MISSION INSPECTOR</div><div class="edition">FOCUS ROOM · 2026</div></div>
+ <div class="top"><div><div class="brand">MISSION INSPECTOR</div><div class="edition">FOCUS ROOM · 2026</div></div><button type="button" class="app-update-btn" id="appUpdateBtn">↻ อัปเดตแอป</button></div>
 
  <nav class="app-nav" aria-label="เมนูหลัก">
   <button class="active" id="navStudy" type="button">📚 STUDY ROOM</button>
@@ -767,6 +771,22 @@ show();
  }
  byId("dutyPrev").addEventListener("click",()=>{dutyViewMonth.setMonth(dutyViewMonth.getMonth()-1);renderDuty();});
  byId("dutyNext").addEventListener("click",()=>{dutyViewMonth.setMonth(dutyViewMonth.getMonth()+1);renderDuty();});
+ byId("appUpdateBtn").addEventListener("click",async()=>{
+  const button=byId("appUpdateBtn");
+  if(button.disabled)return;
+  button.disabled=true;button.classList.add("updating");button.textContent="กำลังตรวจสอบ…";
+  try{
+   const freshUrl=new URL(window.location.href);
+   freshUrl.searchParams.set("app-update",String(Date.now()));
+   const response=await fetch(freshUrl.toString(),{cache:"no-store",credentials:"same-origin"});
+   if(!response.ok)throw new Error("โหลดเวอร์ชันล่าสุดไม่สำเร็จ");
+   button.textContent="กำลังเปิดเวอร์ชันล่าสุด…";
+   window.location.replace(freshUrl.toString());
+  }catch(error){
+   button.disabled=false;button.classList.remove("updating");button.textContent="↻ อัปเดตแอป";
+   alert("ตรวจสอบอัปเดตไม่สำเร็จ กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองอีกครั้ง");
+  }
+ });
  byId("navStudy").addEventListener("click",()=>{
   byId("studyView").classList.remove("view-hidden");byId("dutyView").classList.add("view-hidden");
   byId("navStudy").classList.add("active");byId("navDuty").classList.remove("active");
