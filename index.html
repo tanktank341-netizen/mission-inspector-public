@@ -576,11 +576,12 @@ show();
    if(d.getTime()===dutySelected.getTime())b.classList.add("selected");
    const tag=st.kind==="work"?"เข้าเวร":st.kind==="rest1"?"พัก 1":st.kind==="rest2"?"พัก 2":"";
    const dayKey=dateKey(d),shopVisit=goldShopVisits[dayKey],mission=calendarMissions[dayKey]||"";
-   // วันที่บันทึกร้านทองต้องเป็นสีแดง และแทนป้ายพัก/เข้าเวรด้วยชื่อร้านทอง
-   if(shopVisit)b.classList.add("mission-work");
-   else if(st.kind!=="rest1"&&st.kind!=="rest2")b.classList.add(missionColorClass(mission));
-   const displayTag=shopVisit?"🏪 "+shopVisit:tag;
-   b.innerHTML='<span class="duty-num">'+n+'</span><span class="duty-tag">'+displayTag+'</span>'+(mission?'<span class="duty-mission-tag">'+mission.replace(/</g,"&lt;").replace(/>/g,"&gt;")+'</span>':'');
+   // ภารกิจหรือร้านทองที่บันทึกไว้จะแทนป้ายสถานะเดิม และทำให้วันนั้นเป็นสีแดง
+   if(mission||shopVisit)b.classList.add("mission-work");
+   else if(st.kind!=="rest1"&&st.kind!=="rest2")b.classList.add(missionColorClass(""));
+   const displayTag=mission?mission:(shopVisit?"🏪 "+shopVisit:tag);
+   const shopExtra=(mission&&shopVisit)?'<span class="duty-extra-tag">🏪 '+shopVisit+'</span>':"";
+   b.innerHTML='<span class="duty-num">'+n+'</span><span class="duty-tag">'+displayTag.replace(/</g,"&lt;").replace(/>/g,"&gt;")+'</span>'+shopExtra;
    b.addEventListener("click",()=>{dutySelected=dateOnly(d);renderDuty();});
    container.appendChild(b);
   }
