@@ -162,7 +162,6 @@ body.focus-open{overflow:hidden}
 .duty-day.empty{background:transparent}
 .duty-day.outside{background:#1a2a40;color:#71839a}
 .duty-day.mission-work{background:#e36b72;color:#321317}
-.duty-day.mission-rest{background:#67c69b;color:#09251b}
 .duty-day.mission-leave{background:#f0c85f;color:#30250a}
 .duty-day .duty-mission-tag{font-size:7px;line-height:1.1;font-weight:900;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 2px}
 .duty-day.selected{outline:2px solid #fff;outline-offset:1px}
@@ -517,10 +516,7 @@ show();
  try{calendarMissions=JSON.parse(localStorage.getItem(missionStorageKey)||"{}")||{};}catch(e){calendarMissions={};}
  function saveCalendarMissions(){try{localStorage.setItem(missionStorageKey,JSON.stringify(calendarMissions));}catch(e){alert("ไม่สามารถบันทึกภารกิจในอุปกรณ์นี้ได้");}}
  function missionColorClass(name){
-  const t=(name||"").toLowerCase();
-  if(t.includes("พัก"))return "mission-rest";
-  if(t.includes("ลา"))return "mission-leave";
-  return "mission-work";
+  return (name||"").includes("ลา")?"mission-leave":"mission-work";
  }
  const goldShopStorageKey="missionInspectorGoldShopVisitsV1";
  let goldShopVisits={};
@@ -580,7 +576,8 @@ show();
    if(d.getTime()===dutySelected.getTime())b.classList.add("selected");
    const tag=st.kind==="work"?"เข้าเวร":st.kind==="rest1"?"พัก 1":st.kind==="rest2"?"พัก 2":"";
    const dayKey=dateKey(d),shopVisit=goldShopVisits[dayKey],mission=calendarMissions[dayKey]||"";
-   if(mission)b.classList.add(missionColorClass(mission));
+   // สีปฏิทินยึดสถานะวันพัก 1/2 และวันลาเท่านั้น วันอื่นเป็นสีแดง ไม่ว่ามีบันทึกร้านทองหรือไม่
+   if(st.kind!=="rest1"&&st.kind!=="rest2")b.classList.add(missionColorClass(mission));
    b.innerHTML='<span class="duty-num">'+n+'</span><span class="duty-tag">'+tag+'</span>'+(mission?'<span class="duty-mission-tag">'+mission.replace(/</g,"&lt;").replace(/>/g,"&gt;")+'</span>':'')+(shopVisit?'<span class="duty-extra-tag">🏪 '+shopVisit+'</span>':'');
    b.addEventListener("click",()=>{dutySelected=dateOnly(d);renderDuty();});
    container.appendChild(b);
@@ -599,7 +596,7 @@ show();
   const missionPanel='<div class="duty-edit-note" style="margin-top:14px"><b style="color:#f0d27f">📝 ภารกิจประจำวัน</b></div>'+
    '<div class="duty-edit-actions" style="align-items:stretch"><input id="missionNameInput" type="text" maxlength="60" placeholder="เช่น ประชุม, ตรวจพื้นที่, พัก, ลาพักผ่อน" value="'+currentMission.replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;")+'" style="flex:1;min-width:100%;padding:11px;border-radius:10px;background:#0b192b;color:#f4f7fb;border:1px solid #425671"></div>'+
    '<div class="duty-edit-actions"><button type="button" class="gold-entry" id="saveMissionName">บันทึกภารกิจ</button>'+(currentMission?'<button type="button" class="remove-rest" id="deleteMissionName">ลบภารกิจ</button>':'')+'</div>'+
-   '<div class="duty-shop-note">สีแดง = ภารกิจทั่วไป · สีเขียว = มีคำว่า “พัก” · สีเหลือง = มีคำว่า “ลา”</div>';
+   '<div class="duty-shop-note">สีแดง = ทุกวันยกเว้นพักวันที่ 1, พักวันที่ 2 และวันลา · สีเหลือง = วันลาที่บันทึกคำว่า “ลา”</div>';
   const currentShop=goldShopVisits[selectedKey]||"";
   const shopPanel='<div class="duty-edit-actions"><button type="button" class="gold-entry" id="toggleGoldShop">🏪 '+(currentShop?'เปลี่ยน / จัดการร้านทอง':'เข้าร้านทอง')+'</button></div>'+
    '<div id="goldShopChoices" style="display:'+(currentShop?'flex':'none')+'" class="duty-shop-options">'+
