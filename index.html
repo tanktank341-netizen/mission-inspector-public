@@ -287,6 +287,16 @@ body.focus-open{overflow:hidden}
    </div>
   </section>
   <section class="duty-selected" id="dutySelected"><h3>รายละเอียดวันที่เลือก</h3><p>แตะวันที่ในปฏิทินเพื่อดูรายละเอียด</p></section>
+  <section class="duty-selected backup-panel">
+   <h3>🛡️ สำรองข้อมูล MISSION INSPECTOR</h3>
+   <p>บันทึกข้อมูลร้านทอง ภารกิจ และการปรับตารางเวรไว้เป็นไฟล์ เพื่อป้องกันข้อมูลสูญหาย</p>
+   <div class="duty-edit-actions">
+    <button type="button" class="gold-entry" id="exportBackup">⬇️ สำรองข้อมูล</button>
+    <button type="button" class="remove-rest" id="importBackup">⬆️ กู้คืนข้อมูล</button>
+   </div>
+   <input type="file" id="backupFileInput" accept=".json,application/json" style="display:none">
+   <div class="duty-edit-note">แนะนำให้สำรองข้อมูลหลังเพิ่มหรือแก้ไขรายการสำคัญ และเก็บไฟล์ไว้ในแอป Files หรือ iCloud Drive</div>
+  </section>
   <div class="duty-footnote">รอบเริ่มต้น 19 เมษายน 2569 เป็นวันเข้าเวร · เข้าเวร 08:00–08:00 น. ของวันถัดไป<br>วนซ้ำ เข้าเวร 1 วัน → พัก 2 วัน · ตารางถึง 31 ธันวาคม 2570</div>
  </section>
  <div class="bottom">ONE PERSON · ONE MISSION · KEEP MOVING</div>
@@ -560,6 +570,44 @@ show();
  if(dutySelected>endDate)dutySelected=new Date(endDate);
  if(dutyViewMonth<new Date(2026,3,1))dutyViewMonth=new Date(2026,3,1);
  if(dutyViewMonth>new Date(2027,11,1))dutyViewMonth=new Date(2027,11,1);
+ const backupPrefix="missionInspector";
+ function exportMissionBackup(){
+  const data={};
+  for(let i=0;i<localStorage.length;i++){
+   const key=localStorage.key(i);
+   if(key&&key.startsWith(backupPrefix))data[key]=localStorage.getItem(key);
+  }
+  const backup={app:"MISSION_INSPECTOR",formatVersion:1,createdAt:new Date().toISOString(),data};
+  const blob=new Blob([JSON.stringify(backup,null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob),link=document.createElement("a");
+  link.href=url;link.download="mission-inspector-backup-"+new Date().toISOString().slice(0,10)+".json";
+  document.body.appendChild(link);link.click();link.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1500);
+  alert("สร้างไฟล์สำรองข้อมูลแล้ว กรุณาตรวจสอบไฟล์ในแอป Files");
+ }
+ function restoreMissionBackup(file){
+  const reader=new FileReader();
+  reader.onload=()=>{
+   try{
+    const backup=JSON.parse(reader.result);
+    if(!backup||backup.app!=="MISSION_INSPECTOR"||backup.formatVersion!==1||!backup.data||typeof backup.data!=="object"||Array.isArray(backup.data))throw new Error("รูปแบบไฟล์ไม่ถูกต้อง");
+    const entries=Object.entries(backup.data);
+    if(!entries.length||entries.some(([key,value])=>!key.startsWith(backupPrefix)||typeof value!=="string"))throw new Error("ไม่พบข้อมูลสำรองที่รองรับ");
+    if(!confirm("พบข้อมูลสำรอง "+entries.length+" รายการ\nการกู้คืนจะแทนที่ข้อมูล MISSION INSPECTOR ปัจจุบัน ต้องการดำเนินการต่อหรือไม่?"))return;
+    const keysToRemove=[];
+    for(let i=0;i<localStorage.length;i++){const key=localStorage.key(i);if(key&&key.startsWith(backupPrefix))keysToRemove.push(key);}
+    keysToRemove.forEach(key=>localStorage.removeItem(key));
+    entries.forEach(([key,value])=>localStorage.setItem(key,value));
+    alert("กู้คืนข้อมูลสำเร็จ แอปจะโหลดใหม่");
+    location.reload();
+   }catch(error){alert("กู้คืนไม่สำเร็จ: "+error.message);}
+  };
+  reader.onerror=()=>alert("อ่านไฟล์ไม่สำเร็จ กรุณาลองใหม่");
+  reader.readAsText(file);
+ }
+ byId("exportBackup").addEventListener("click",exportMissionBackup);
+ byId("importBackup").addEventListener("click",()=>byId("backupFileInput").click());
+ byId("backupFileInput").addEventListener("change",event=>{const file=event.target.files&&event.target.files[0];if(file)restoreMissionBackup(file);event.target.value="";});
  function baseDutyState(d){
   const n=dayDiff(d,startDate);
   if(n<0||dateOnly(d)>endDate)return {kind:"outside",label:"นอกช่วงตาราง",detail:"ไม่มีข้อมูลในช่วงที่กำหนด"};
