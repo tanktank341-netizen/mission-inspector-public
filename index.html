@@ -126,11 +126,60 @@ body.focus-open{overflow:hidden}
 @media(max-width:390px){.focus-clock{letter-spacing:-4px}.focus-controls{gap:6px}.focus-controls button{font-size:12px;padding:14px 5px}}
 @media(max-width:390px){.shell{padding-top:20px}.panel{padding:17px}.clock{letter-spacing:-3px}.controls{gap:6px}.controls button{font-size:12px;padding:13px 5px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+
+/* Integrated personal duty calendar */
+.app-nav{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:-12px 0 22px;padding:5px;background:#0a1727;border:1px solid #293b51;border-radius:15px}
+.app-nav button{padding:12px 8px;border:1px solid transparent;background:transparent;color:#91a2b7;font-size:12px}
+.app-nav button.active{background:linear-gradient(135deg,#f1d28e,#d8ad60);color:#15263b;border:0;box-shadow:0 5px 16px #0003}
+.view-hidden{display:none!important}
+.duty-view{display:block}
+.duty-hero{padding:18px;border:1px solid #8d7449;border-radius:19px;background:linear-gradient(135deg,#1b3048,#122238);box-shadow:0 12px 30px #0003;margin-bottom:13px}
+.duty-kicker{font-size:10px;letter-spacing:2px;color:var(--gold);font-weight:900}
+.duty-today-label{font-size:11px;color:#a9b9ca;margin-top:8px}
+.duty-status{font-size:23px;font-weight:900;margin:7px 0}
+.duty-detail{font-size:12px;color:#c5d1df}
+.duty-countdown{font-size:12px;color:#f1d28e;margin-top:12px}
+.duty-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
+.duty-stat{background:#111e30;border:1px solid #293b51;border-radius:14px;padding:12px 9px}
+.duty-stat strong{display:block;font-size:22px;color:#f4f7fb}
+.duty-stat span{display:block;font-size:10px;color:#9aabc0;line-height:1.35}
+.duty-calendar{background:linear-gradient(155deg,#172941,#101c2d 70%);border:1px solid #31465e;border-radius:21px;padding:15px;box-shadow:0 18px 42px #0003}
+.duty-cal-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px}
+.duty-cal-head h2{font-size:17px;margin:0}
+.duty-cal-nav{display:flex;gap:6px}
+.duty-cal-nav button{padding:8px 12px;background:#0d1b2c;border-radius:10px}
+.duty-week,.duty-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.duty-week div{text-align:center;color:#91a2b7;font-size:10px;padding:6px 0}
+.duty-day{min-width:0;min-height:57px;border:1px solid transparent;border-radius:10px;padding:5px 1px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#142033}
+.duty-day .duty-num{font-size:13px;font-weight:900}
+.duty-day .duty-tag{font-size:8px;font-weight:900;line-height:1}
+.duty-day.work{background:#e36b72;color:#321317}
+.duty-day.rest1{background:#f0c85f;color:#30250a}
+.duty-day.rest2{background:#67c69b;color:#09251b}
+.duty-day.empty{background:transparent}
+.duty-day.outside{background:#1a2a40;color:#71839a}
+.duty-day.selected{outline:2px solid #fff;outline-offset:1px}
+.duty-day.today:not(.selected){border-color:#fff}
+.duty-legend{display:flex;flex-wrap:wrap;gap:10px;margin:13px 2px 1px;color:#9aabc0;font-size:10px}
+.duty-legend i{width:9px;height:9px;border-radius:3px;display:inline-block;margin-right:5px}
+.duty-selected{background:#111e30;border:1px solid #293b51;border-radius:15px;padding:13px;margin-top:12px}
+.duty-selected h3{font-size:14px;margin:0 0 7px}
+.duty-selected p{font-size:12px;color:#b8c6d9;margin:5px 0}
+.duty-footnote{font-size:10px;color:#71839a;text-align:center;line-height:1.6;margin:13px 4px}
+.duty-cal-nav button:disabled{opacity:.35}
+@media(max-width:390px){.duty-day{min-height:49px}.duty-day .duty-num{font-size:12px}.duty-day .duty-tag{font-size:7px}.duty-stats{gap:6px}.duty-stat{padding:10px 7px}.duty-stat strong{font-size:19px}}
+
 </style>
 </head>
 <body>
 <div class="shell">
  <div class="top"><div class="brand">MISSION INSPECTOR</div><div class="edition">FOCUS ROOM · 2026</div></div>
+
+ <nav class="app-nav" aria-label="เมนูหลัก">
+  <button class="active" id="navStudy" type="button">📚 STUDY ROOM</button>
+  <button id="navDuty" type="button">🗓 DUTY SCHEDULE</button>
+ </nav>
+ <div id="studyView">
  <section class="intro"><h1>ว่าที่ผู้หมวด<br>วันนี้จะลุยวิชาอะไรดี?</h1><p>เลือกหนึ่งวิชา แล้วเริ่มโฟกัสกับเป้าหมายของเรา</p></section>
  <section class="daily-card" aria-live="polite">
   <div class="daily-kicker">TODAY'S MISSION · ตารางอ่านประจำวัน</div>
@@ -173,7 +222,35 @@ body.focus-open{overflow:hidden}
    <button class="notes-launch" id="notesOpen">⇩ ส่งออกกระดาษสำหรับจด</button>
   </section>
  </main>
- <div class="bottom">ONE SUBJECT · ONE SESSION · ONE STEP CLOSER</div>
+
+ </div>
+ <section id="dutyView" class="duty-view view-hidden" aria-label="ตารางเวร">
+  <div class="duty-hero">
+   <div class="duty-kicker">DUTY SCHEDULE · PERSONAL ROSTER</div>
+   <div class="duty-today-label" id="dutyTodayLabel">วันนี้</div>
+   <div class="duty-status" id="dutyTodayStatus">กำลังคำนวณ...</div>
+   <div class="duty-detail" id="dutyTodayDetail"></div>
+   <div class="duty-countdown" id="dutyCountdown"></div>
+  </div>
+  <div class="duty-stats">
+   <div class="duty-stat"><strong id="dutyWorkCount">—</strong><span>วันเข้าเวรในเดือนนี้</span></div>
+   <div class="duty-stat"><strong id="dutyRestCount">—</strong><span>วันพักในเดือนนี้</span></div>
+   <div class="duty-stat"><strong id="dutyNextCount">—</strong><span>วันถึงเวรถัดไป</span></div>
+  </div>
+  <section class="duty-calendar">
+   <div class="duty-cal-head"><h2 id="dutyMonthTitle">เดือน</h2><div class="duty-cal-nav"><button id="dutyPrev" type="button" aria-label="เดือนก่อน">‹</button><button id="dutyNext" type="button" aria-label="เดือนถัดไป">›</button></div></div>
+   <div class="duty-week"><div>จ</div><div>อ</div><div>พ</div><div>พฤ</div><div>ศ</div><div>ส</div><div>อา</div></div>
+   <div class="duty-days" id="dutyDays"></div>
+   <div class="duty-legend">
+    <span><i style="background:#e36b72"></i>เข้าเวร 24 ชม.</span>
+    <span><i style="background:#f0c85f"></i>พักวันแรก</span>
+    <span><i style="background:#67c69b"></i>พักวันที่สอง</span>
+   </div>
+  </section>
+  <section class="duty-selected" id="dutySelected"><h3>รายละเอียดวันที่เลือก</h3><p>แตะวันที่ในปฏิทินเพื่อดูรายละเอียด</p></section>
+  <div class="duty-footnote">รอบเริ่มต้น 19 เมษายน 2569 เป็นวันเข้าเวร · เข้าเวร 08:00–08:00 น. ของวันถัดไป<br>วนซ้ำ เข้าเวร 1 วัน → พัก 2 วัน · ตารางถึง 31 ธันวาคม 2570</div>
+ </section>
+ <div class="bottom">ONE PERSON · ONE MISSION · KEEP MOVING</div>
 </div>
 <div class="focus-overlay" id="focusOverlay" role="dialog" aria-modal="true" aria-label="Focus Mode">
  <div class="focus-inner">
@@ -403,5 +480,74 @@ $("notesOpen").addEventListener("click",()=>{
  $("status").textContent="สร้างกระดาษจดเปล่า 5 หน้าแล้ว · เลือก Save as PDF แล้วนำเข้า Goodnotes";
 });
 show();
+
+/* Duty schedule module: 24h duty, then two rest days */
+(function(){
+ const startDate=new Date(2026,3,19),endDate=new Date(2027,11,31);
+ const monthNames=["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
+ const dayNames=["อาทิตย์","จันทร์","อังคาร","พุธ","พฤหัสบดี","ศุกร์","เสาร์"];
+ const byId=id=>document.getElementById(id);
+ const dateOnly=d=>new Date(d.getFullYear(),d.getMonth(),d.getDate());
+ const dayDiff=(a,b)=>Math.round((dateOnly(a)-dateOnly(b))/86400000);
+ let dutyViewMonth=new Date();dutyViewMonth.setDate(1);
+ let dutySelected=dateOnly(new Date());
+ if(dutySelected<startDate)dutySelected=new Date(startDate);
+ if(dutySelected>endDate)dutySelected=new Date(endDate);
+ if(dutyViewMonth<new Date(2026,3,1))dutyViewMonth=new Date(2026,3,1);
+ if(dutyViewMonth>new Date(2027,11,1))dutyViewMonth=new Date(2027,11,1);
+ function dutyState(d){
+  const n=dayDiff(d,startDate);
+  if(n<0||dateOnly(d)>endDate)return {kind:"outside",label:"นอกช่วงตาราง",detail:"ไม่มีข้อมูลในช่วงที่กำหนด"};
+  const r=((n%3)+3)%3;
+  if(r===0)return {kind:"work",label:"เข้าเวร 24 ชั่วโมง",detail:"08:00 น. – 08:00 น. ของวันถัดไป"};
+  if(r===1)return {kind:"rest1",label:"พักวันแรก",detail:"วันพักหลังเข้าเวร"};
+  return {kind:"rest2",label:"พักวันที่สอง",detail:"วันพักวันที่สอง ก่อนเริ่มรอบใหม่"};
+ }
+ function dutyThaiDate(d){return d.getDate()+" "+monthNames[d.getMonth()]+" "+(d.getFullYear()+543)}
+ function renderDuty(){
+  const today=dateOnly(new Date()),todayState=dutyState(today);
+  byId("dutyTodayLabel").textContent="วันนี้ · "+dutyThaiDate(today);
+  const colors={work:"#e36b72",rest1:"#f0c85f",rest2:"#67c69b",outside:"#9aabc0"};
+  byId("dutyTodayStatus").innerHTML='<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:'+colors[todayState.kind]+';margin-right:8px"></span>'+todayState.label;
+  byId("dutyTodayDetail").textContent=todayState.detail;
+  let nextDays=null,nextDate=null;
+  for(let i=0;i<=3;i++){const d=new Date(today);d.setDate(d.getDate()+i);if(dutyState(d).kind==="work"){nextDays=i;nextDate=d;break;}}
+  byId("dutyCountdown").textContent=todayState.kind==="work"?"วันนี้เป็นวันเข้าเวรของมึงแล้ว":nextDate?(nextDays===0?"วันนี้มีเวร":"อีก "+nextDays+" วัน จะเข้าเวรครั้งถัดไป · "+dutyThaiDate(nextDate)):"ไม่มีเวรถัดไปในช่วงตาราง";
+  const y=dutyViewMonth.getFullYear(),m=dutyViewMonth.getMonth();
+  byId("dutyMonthTitle").textContent=monthNames[m]+" "+(y+543);
+  const first=new Date(y,m,1),offset=(first.getDay()+6)%7,total=new Date(y,m+1,0).getDate();
+  const container=byId("dutyDays");container.innerHTML="";
+  for(let i=0;i<offset;i++){const empty=document.createElement("div");empty.className="duty-day empty";container.appendChild(empty);}
+  let workCount=0,restCount=0;
+  for(let n=1;n<=total;n++){
+   const d=new Date(y,m,n),st=dutyState(d);
+   if(st.kind==="work")workCount++;else if(st.kind==="rest1"||st.kind==="rest2")restCount++;
+   const b=document.createElement("button");b.type="button";b.className="duty-day "+st.kind;
+   if(d.getTime()===today.getTime())b.classList.add("today");
+   if(d.getTime()===dutySelected.getTime())b.classList.add("selected");
+   const tag=st.kind==="work"?"เข้าเวร":st.kind==="rest1"?"พัก 1":st.kind==="rest2"?"พัก 2":"";
+   b.innerHTML='<span class="duty-num">'+n+'</span><span class="duty-tag">'+tag+'</span>';
+   b.addEventListener("click",()=>{dutySelected=dateOnly(d);renderDuty();});
+   container.appendChild(b);
+  }
+  byId("dutyWorkCount").textContent=workCount;byId("dutyRestCount").textContent=restCount;
+  byId("dutyNextCount").textContent=nextDate?nextDays+" วัน":"—";
+  const selectedState=dutyState(dutySelected);
+  byId("dutySelected").innerHTML='<h3>'+dutyThaiDate(dutySelected)+' · วัน'+dayNames[dutySelected.getDay()]+'</h3><p><b style="color:'+colors[selectedState.kind]+'">'+selectedState.label+'</b></p><p>'+selectedState.detail+'</p>';
+  byId("dutyPrev").disabled=(y===2026&&m===3);byId("dutyNext").disabled=(y===2027&&m===11);
+ }
+ byId("dutyPrev").addEventListener("click",()=>{dutyViewMonth.setMonth(dutyViewMonth.getMonth()-1);renderDuty();});
+ byId("dutyNext").addEventListener("click",()=>{dutyViewMonth.setMonth(dutyViewMonth.getMonth()+1);renderDuty();});
+ byId("navStudy").addEventListener("click",()=>{
+  byId("studyView").classList.remove("view-hidden");byId("dutyView").classList.add("view-hidden");
+  byId("navStudy").classList.add("active");byId("navDuty").classList.remove("active");
+ });
+ byId("navDuty").addEventListener("click",()=>{
+  byId("studyView").classList.add("view-hidden");byId("dutyView").classList.remove("view-hidden");
+  byId("navDuty").classList.add("active");byId("navStudy").classList.remove("active");renderDuty();
+ });
+ renderDuty();
+})();
+
 </script>
 </body></html>
