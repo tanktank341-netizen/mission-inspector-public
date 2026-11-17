@@ -733,7 +733,7 @@ show();
    '<button type="button" id="shopTypeHired" '+(currentShopType==="รับจ้าง"?'class="shop-type-current"':'')+'>รับจ้าง</button>'+
    '<button type="button" id="shopTypeOwnDuty" '+(currentShopType==="เวรตัวเอง"?'class="shop-type-current"':'')+'>เวรตัวเอง</button></div>':'';
   const shopDetailPopup=(currentShop&&currentShopType)?'<div class="duty-shop-detail-popup"><b>รายละเอียดร้านทอง</b>🏪 '+currentShop+' · '+currentShopType+'</div>':'';
-  const shopPanel='<details class="action-group"><summary>🏪 บันทึกร้านทอง <span>'+(currentShop?'มีรายการแล้ว':'เพิ่ม / แก้ไขรายการ')+'</span></summary>'+
+  const shopPanel='<details class="action-group"'+(hasPendingShop?' open':'')+'><summary>🏪 บันทึกร้านทอง <span>'+(currentShop?'มีรายการแล้ว':'เพิ่ม / แก้ไขรายการ')+'</span></summary>'+
    '<div class="duty-edit-actions"><button type="button" class="gold-entry" id="toggleGoldShop">เลือก / เปลี่ยนร้านทอง</button></div>'+
    '<div id="goldShopChoices" style="display:'+(currentShop?'flex':'none')+'" class="duty-shop-options">'+
    '<button type="button" id="chooseThaiPrayoon" '+(currentShop==="ไทยประยูร"?'class="shop-current"':'')+'>ไทยประยูร</button>'+
