@@ -161,6 +161,10 @@ body.focus-open{overflow:hidden}
 .duty-day.rest2{background:#67c69b;color:#09251b}
 .duty-day.empty{background:transparent}
 .duty-day.outside{background:#1a2a40;color:#71839a}
+.duty-day.mission-work{background:#e36b72;color:#321317}
+.duty-day.mission-rest{background:#67c69b;color:#09251b}
+.duty-day.mission-leave{background:#f0c85f;color:#30250a}
+.duty-day .duty-mission-tag{font-size:7px;line-height:1.1;font-weight:900;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 2px}
 .duty-day.selected{outline:2px solid #fff;outline-offset:1px}
 .duty-day.today:not(.selected){border-color:#fff}
 .duty-legend{display:flex;flex-wrap:wrap;gap:10px;margin:13px 2px 1px;color:#9aabc0;font-size:10px}
@@ -508,6 +512,16 @@ show();
  const byId=id=>document.getElementById(id);
  const dateOnly=d=>new Date(d.getFullYear(),d.getMonth(),d.getDate());
  const dayDiff=(a,b)=>Math.round((dateOnly(a)-dateOnly(b))/86400000);
+ const missionStorageKey="missionInspectorCalendarMissionsV1";
+ let calendarMissions={};
+ try{calendarMissions=JSON.parse(localStorage.getItem(missionStorageKey)||"{}")||{};}catch(e){calendarMissions={};}
+ function saveCalendarMissions(){try{localStorage.setItem(missionStorageKey,JSON.stringify(calendarMissions));}catch(e){alert("ไม่สามารถบันทึกภารกิจในอุปกรณ์นี้ได้");}}
+ function missionColorClass(name){
+  const t=(name||"").toLowerCase();
+  if(t.includes("พัก"))return "mission-rest";
+  if(t.includes("ลา"))return "mission-leave";
+  return "mission-work";
+ }
  const goldShopStorageKey="missionInspectorGoldShopVisitsV1";
  let goldShopVisits={};
  try{goldShopVisits=JSON.parse(localStorage.getItem(goldShopStorageKey)||"{}")||{};}catch(e){goldShopVisits={};}
@@ -565,8 +579,9 @@ show();
    if(d.getTime()===today.getTime())b.classList.add("today");
    if(d.getTime()===dutySelected.getTime())b.classList.add("selected");
    const tag=st.kind==="work"?"เข้าเวร":st.kind==="rest1"?"พัก 1":st.kind==="rest2"?"พัก 2":"";
-   const shopVisit=goldShopVisits[dateKey(d)];
-   b.innerHTML='<span class="duty-num">'+n+'</span><span class="duty-tag">'+tag+'</span>'+(shopVisit?'<span class="duty-extra-tag">🏪 '+shopVisit+'</span>':'');
+   const dayKey=dateKey(d),shopVisit=goldShopVisits[dayKey],mission=calendarMissions[dayKey]||"";
+   if(mission)b.classList.add(missionColorClass(mission));
+   b.innerHTML='<span class="duty-num">'+n+'</span><span class="duty-tag">'+tag+'</span>'+(mission?'<span class="duty-mission-tag">'+mission.replace(/</g,"&lt;").replace(/>/g,"&gt;")+'</span>':'')+(shopVisit?'<span class="duty-extra-tag">🏪 '+shopVisit+'</span>':'');
    b.addEventListener("click",()=>{dutySelected=dateOnly(d);renderDuty();});
    container.appendChild(b);
   }
@@ -580,6 +595,11 @@ show();
    '<button type="button" class="set-rest2" id="setDutyRest2">🟢 กำหนดเป็นวันพัก 2</button>'+
    '<button type="button" class="remove-rest" id="resetDutyDay" '+(hasOverride?'':'disabled')+'>↶ คืนค่าตารางเวรเดิม</button>'+
    '</div><div class="duty-edit-note">เลือกประเภทวันเพื่อเพิ่มหรือแก้ไขได้ทันที · ปุ่มคืนค่าจะลบการแก้ไขเฉพาะวันที่เลือก และกลับไปใช้รอบเวรปกติ</div>':'';
+  const currentMission=calendarMissions[selectedKey]||"";
+  const missionPanel='<div class="duty-edit-note" style="margin-top:14px"><b style="color:#f0d27f">📝 ภารกิจประจำวัน</b></div>'+
+   '<div class="duty-edit-actions" style="align-items:stretch"><input id="missionNameInput" type="text" maxlength="60" placeholder="เช่น ประชุม, ตรวจพื้นที่, พัก, ลาพักผ่อน" value="'+currentMission.replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;")+'" style="flex:1;min-width:100%;padding:11px;border-radius:10px;background:#0b192b;color:#f4f7fb;border:1px solid #425671"></div>'+
+   '<div class="duty-edit-actions"><button type="button" class="gold-entry" id="saveMissionName">บันทึกภารกิจ</button>'+(currentMission?'<button type="button" class="remove-rest" id="deleteMissionName">ลบภารกิจ</button>':'')+'</div>'+
+   '<div class="duty-shop-note">สีแดง = ภารกิจทั่วไป · สีเขียว = มีคำว่า “พัก” · สีเหลือง = มีคำว่า “ลา”</div>';
   const currentShop=goldShopVisits[selectedKey]||"";
   const shopPanel='<div class="duty-edit-actions"><button type="button" class="gold-entry" id="toggleGoldShop">🏪 '+(currentShop?'เปลี่ยน / จัดการร้านทอง':'เข้าร้านทอง')+'</button></div>'+
    '<div id="goldShopChoices" style="display:'+(currentShop?'flex':'none')+'" class="duty-shop-options">'+
@@ -587,7 +607,10 @@ show();
    '<button type="button" id="chooseSereewat" '+(currentShop==="เสรีวัฒน์"?'class="shop-current"':'')+'>เสรีวัฒน์</button>'+
    (currentShop?'<button type="button" class="shop-remove" id="removeGoldShop">ลบรายการร้านทอง</button>':'')+
    '</div><div class="duty-shop-note">'+(currentShop?'วันที่เลือกบันทึกว่าเข้าร้าน '+currentShop+' · เลือกร้านใหม่เพื่อแก้ไข หรือกดลบรายการ':'เลือกวันที่ แล้วกดเข้าร้านทองเพื่อเลือกร้านที่ไป')+'</div>';
-  byId("dutySelected").innerHTML='<h3>'+dutyThaiDate(dutySelected)+' · วัน'+dayNames[dutySelected.getDay()]+'</h3><p><b style="color:'+colors[selectedState.kind]+'">'+selectedState.label+'</b></p><p>'+selectedState.detail+'</p>'+actions+shopPanel;
+  byId("dutySelected").innerHTML='<h3>'+dutyThaiDate(dutySelected)+' · วัน'+dayNames[dutySelected.getDay()]+'</h3><p><b style="color:'+colors[selectedState.kind]+'">'+selectedState.label+'</b></p><p>'+selectedState.detail+'</p>'+actions+missionPanel+shopPanel;
+  const missionInput=byId("missionNameInput"),saveMission=byId("saveMissionName"),deleteMission=byId("deleteMissionName");
+  if(saveMission)saveMission.addEventListener("click",()=>{const value=missionInput.value.trim();if(!value){alert("กรุณากรอกชื่อภารกิจ");return;}calendarMissions[selectedKey]=value;saveCalendarMissions();renderDuty();});
+  if(deleteMission)deleteMission.addEventListener("click",()=>{delete calendarMissions[selectedKey];saveCalendarMissions();renderDuty();});
   const setDay=(kind)=>{dutyRestOverrides[selectedKey]=kind;saveDutyOverrides();renderDuty();};
   const workBtn=byId("setDutyWork"),rest1Btn=byId("setDutyRest1"),rest2Btn=byId("setDutyRest2"),resetBtn=byId("resetDutyDay");
   if(workBtn)workBtn.addEventListener("click",()=>setDay("work"));
