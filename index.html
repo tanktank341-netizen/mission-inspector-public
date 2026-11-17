@@ -157,7 +157,7 @@ body.focus-open{overflow:hidden}
 .duty-day .duty-num{font-size:13px;font-weight:900}
 .duty-day .duty-tag{font-size:8px;font-weight:900;line-height:1}
 .duty-day.work{background:#e36b72;color:#321317}
-.duty-day.rest1{background:#f0c85f;color:#30250a}
+.duty-day.rest1{background:#67c69b;color:#09251b}
 .duty-day.rest2{background:#67c69b;color:#09251b}
 .duty-day.empty{background:transparent}
 .duty-day.outside{background:#1a2a40;color:#71839a}
@@ -547,7 +547,7 @@ show();
   const override=dutyRestOverrides[key];
   if(override){
    const kind=override===true?"rest1":override;
-   const labels={work:["เข้าเวร 24 ชั่วโมง","08:00 น. – 08:00 น. ของวันถัดไป"],rest1:["พักวันแรก","วันพักหลังเข้าเวร"],rest2:["พักวันที่สอง","วันพักวันที่สอง ก่อนเริ่มรอบใหม่"]};
+   const labels={work:["เข้าเวร 24 ชั่วโมง","08:00 น. – 08:00 น. ของวันถัดไป"],rest:["พัก","กำหนดเป็นวันพัก"],rest1:["พัก","วันพักหลังเข้าเวร"],rest2:["พัก","วันพักวันที่สอง ก่อนเริ่มรอบใหม่"]};
    if(labels[kind])return {kind,label:labels[kind][0],detail:labels[kind][1]+" · กำหนดเอง",custom:true};
   }
   return base;
@@ -556,7 +556,7 @@ show();
  function renderDuty(){
   const today=dateOnly(new Date()),todayState=dutyState(today);
   byId("dutyTodayLabel").textContent="วันนี้ · "+dutyThaiDate(today);
-  const colors={work:"#e36b72",rest1:"#f0c85f",rest2:"#67c69b",outside:"#9aabc0"};
+  const colors={work:"#e36b72",rest:"#67c69b",rest1:"#67c69b",rest2:"#67c69b",outside:"#9aabc0"};
   byId("dutyTodayStatus").innerHTML='<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:'+colors[todayState.kind]+';margin-right:8px"></span>'+todayState.label;
   byId("dutyTodayDetail").textContent=todayState.detail;
   let nextDays=null,nextDate=null;
@@ -574,7 +574,7 @@ show();
    const b=document.createElement("button");b.type="button";b.className="duty-day "+st.kind;
    if(d.getTime()===today.getTime())b.classList.add("today");
    if(d.getTime()===dutySelected.getTime())b.classList.add("selected");
-   const tag=st.kind==="work"?"เข้าเวร":st.kind==="rest1"?"พัก 1":st.kind==="rest2"?"พัก 2":"";
+   const tag=st.kind==="work"?"เข้าเวร":(st.kind==="rest"||st.kind==="rest1"||st.kind==="rest2")?"พัก":"";
    const dayKey=dateKey(d),shopVisit=goldShopVisits[dayKey],mission=calendarMissions[dayKey]||"";
    // ภารกิจหรือร้านทองที่บันทึกไว้จะแทนป้ายสถานะเดิม และทำให้วันนั้นเป็นสีแดง
    if(mission||shopVisit)b.classList.add("mission-work");
@@ -591,8 +591,7 @@ show();
   const canEdit=selectedState.kind!=="outside";
   const actions=canEdit?'<div class="duty-edit-actions">'+
    '<button type="button" class="set-work" id="setDutyWork">🔴 กำหนดเป็นวันเข้าเวร</button>'+
-   '<button type="button" class="set-rest1" id="setDutyRest1">🟡 กำหนดเป็นวันพัก 1</button>'+
-   '<button type="button" class="set-rest2" id="setDutyRest2">🟢 กำหนดเป็นวันพัก 2</button>'+
+   '<button type="button" class="set-rest2" id="setDutyRest">🟢 กำหนดเป็นวันพัก</button>'+
    '<button type="button" class="remove-rest" id="resetDutyDay" '+(hasOverride?'':'disabled')+'>↶ คืนค่าตารางเวรเดิม</button>'+
    '</div><div class="duty-edit-note">เลือกประเภทวันเพื่อเพิ่มหรือแก้ไขได้ทันที · ปุ่มคืนค่าจะลบการแก้ไขเฉพาะวันที่เลือก และกลับไปใช้รอบเวรปกติ</div>':'';
   const currentMission=calendarMissions[selectedKey]||"";
@@ -612,10 +611,9 @@ show();
   if(saveMission)saveMission.addEventListener("click",()=>{const value=missionInput.value.trim();if(!value){alert("กรุณากรอกชื่อภารกิจ");return;}calendarMissions[selectedKey]=value;saveCalendarMissions();renderDuty();});
   if(deleteMission)deleteMission.addEventListener("click",()=>{delete calendarMissions[selectedKey];saveCalendarMissions();renderDuty();});
   const setDay=(kind)=>{dutyRestOverrides[selectedKey]=kind;saveDutyOverrides();renderDuty();};
-  const workBtn=byId("setDutyWork"),rest1Btn=byId("setDutyRest1"),rest2Btn=byId("setDutyRest2"),resetBtn=byId("resetDutyDay");
+  const workBtn=byId("setDutyWork"),restBtn=byId("setDutyRest"),resetBtn=byId("resetDutyDay");
   if(workBtn)workBtn.addEventListener("click",()=>setDay("work"));
-  if(rest1Btn)rest1Btn.addEventListener("click",()=>setDay("rest1"));
-  if(rest2Btn)rest2Btn.addEventListener("click",()=>setDay("rest2"));
+  if(restBtn)restBtn.addEventListener("click",()=>setDay("rest"));
   if(resetBtn)resetBtn.addEventListener("click",()=>{delete dutyRestOverrides[selectedKey];saveDutyOverrides();renderDuty();});
   const shopToggle=byId("toggleGoldShop"),shopChoices=byId("goldShopChoices");
   if(shopToggle)shopToggle.addEventListener("click",()=>{shopChoices.style.display=shopChoices.style.display==="none"?"flex":"none";});
