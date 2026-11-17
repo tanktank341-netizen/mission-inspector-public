@@ -191,6 +191,16 @@ body.focus-open{overflow:hidden}
 .duty-shop-type-options button.shop-type-current{background:#f0cb65;color:#30240d}
 .duty-shop-detail-popup{margin:10px 0;padding:10px 12px;border:1px solid #b78d48;border-radius:11px;background:#1c2d43;color:#ffe6a8;font-size:12px;box-shadow:0 5px 18px #0005}
 .duty-shop-detail-popup b{display:block;color:#f0d27f;margin-bottom:4px}
+.gold-visit-overlay{position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;padding:22px;background:rgba(13,22,35,.48);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
+.gold-visit-overlay.show{display:flex}
+.gold-visit-card{position:relative;width:min(100%,310px);padding:54px 25px 25px;border-radius:26px;background:linear-gradient(145deg,#fff,#f3f5f8);color:#202b3b;text-align:center;box-shadow:0 22px 55px rgba(0,0,0,.25),inset 0 1px 0 #fff;animation:goldPopupIn .22s ease-out}
+.gold-visit-icon{position:absolute;left:50%;top:-42px;transform:translateX(-50%);width:84px;height:84px;border-radius:50%;display:grid;place-items:center;background:#fff;border:3px solid #edf0f4;box-shadow:0 8px 20px rgba(0,0,0,.13);font-size:39px}
+.gold-visit-card h3{font-size:20px;margin:4px 0 8px;color:#202b3b}
+.gold-visit-card .gold-visit-caption{font-size:12px;color:#778292;margin:0 0 16px}
+.gold-visit-info{padding:13px 12px;border-radius:14px;background:#e9edf2;color:#263449;font-size:15px;font-weight:800;line-height:1.7}
+.gold-visit-info span{display:block;font-size:12px;font-weight:600;color:#6c7889}
+.gold-visit-close{margin-top:19px;min-width:105px;padding:10px 23px;border:0;border-radius:999px;background:linear-gradient(135deg,#344b91,#263875);color:#fff;font-weight:800}
+@keyframes goldPopupIn{from{opacity:0;transform:translateY(9px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
 
 .duty-footnote{font-size:10px;color:#71839a;text-align:center;line-height:1.6;margin:13px 4px}
 .duty-cal-nav button:disabled{opacity:.35}
@@ -318,6 +328,15 @@ body.focus-open{overflow:hidden}
   <div class="focus-controls"><button class="primary" id="focusStart">▶ เริ่มอ่าน</button><button id="focusPause">Ⅱ พัก</button><button id="focusReset">↺ เริ่มใหม่</button></div>
   <button class="focus-rest" id="focusRestStart">☕ พัก 5 นาที</button>
   <div class="focus-quote">ONE TASK. FULL ATTENTION. KEEP MOVING.</div>
+ </div>
+</div>
+<div class="gold-visit-overlay" id="goldVisitOverlay" role="dialog" aria-modal="true" aria-labelledby="goldVisitTitle">
+ <div class="gold-visit-card">
+  <div class="gold-visit-icon">🏪</div>
+  <h3 id="goldVisitTitle">รายละเอียดการเข้าร้านทอง</h3>
+  <p class="gold-visit-caption">ข้อมูลร้านทองของวันที่เลือก</p>
+  <div class="gold-visit-info"><span id="goldVisitDate"></span><strong id="goldVisitShop"></strong><span id="goldVisitType"></span></div>
+  <button type="button" class="gold-visit-close" id="closeGoldVisitPopup">ปิด</button>
  </div>
 </div>
 <script>
@@ -562,6 +581,17 @@ show();
   return base;
  }
  function dutyThaiDate(d){return d.getDate()+" "+monthNames[d.getMonth()]+" "+(d.getFullYear()+543)}
+ function openGoldVisitPopup(date,shop,type){
+  const overlay=byId("goldVisitOverlay");
+  byId("goldVisitDate").textContent=dutyThaiDate(date)+" · วัน"+dayNames[date.getDay()];
+  byId("goldVisitShop").textContent="🏪 "+shop;
+  byId("goldVisitType").textContent=type;
+  overlay.classList.add("show");
+ }
+ function closeGoldVisitPopup(){byId("goldVisitOverlay").classList.remove("show");}
+ byId("closeGoldVisitPopup").addEventListener("click",closeGoldVisitPopup);
+ byId("goldVisitOverlay").addEventListener("click",e=>{if(e.target===byId("goldVisitOverlay"))closeGoldVisitPopup();});
+ document.addEventListener("keydown",e=>{if(e.key==="Escape")closeGoldVisitPopup();});
  function renderDuty(){
   const today=dateOnly(new Date()),todayState=dutyState(today);
   byId("dutyTodayLabel").textContent="วันนี้ · "+dutyThaiDate(today);
@@ -591,7 +621,7 @@ show();
    const displayTag=mission?mission:(shopVisit?"🏪 "+shopVisit:tag);
    const shopExtra=(mission&&shopVisit)?'<span class="duty-extra-tag">🏪 '+shopVisit+'</span>':"";
    b.innerHTML='<span class="duty-num">'+n+'</span><span class="duty-tag">'+displayTag.replace(/</g,"&lt;").replace(/>/g,"&gt;")+'</span>'+shopExtra;
-   b.addEventListener("click",()=>{dutySelected=dateOnly(d);renderDuty();});
+   b.addEventListener("click",()=>{dutySelected=dateOnly(d);renderDuty();const visit=goldShopVisits[dayKey],visitType=goldShopVisitTypes[dayKey];if(visit&&visitType)openGoldVisitPopup(d,visit,visitType);});
    container.appendChild(b);
   }
   byId("dutyWorkCount").textContent=workCount;byId("dutyRestCount").textContent=restCount;
