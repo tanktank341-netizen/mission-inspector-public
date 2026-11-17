@@ -209,6 +209,18 @@ body.focus-open{overflow:hidden}
 .duty-cal-nav button:disabled{opacity:.35}
 @media(max-width:390px){.duty-day{min-height:49px}.duty-day .duty-num{font-size:12px}.duty-day .duty-tag{font-size:7px}.duty-stats{gap:6px}.duty-stat{padding:10px 7px}.duty-stat strong{font-size:19px}}
 
+.action-group{border:1px solid #344b64;border-radius:13px;background:#14243a;margin-top:10px;overflow:hidden}
+.action-group summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 14px;color:#f1d28e;font-size:12px;font-weight:850;cursor:pointer}
+.action-group summary::-webkit-details-marker{display:none}
+.action-group summary:after{content:"＋";color:#9aabc0;font-size:17px;font-weight:500}
+.action-group[open] summary:after{content:"−"}
+.action-group summary span{margin-left:auto;color:#91a2b7;font-size:10px;font-weight:500;text-align:right}
+.action-group[open] summary{border-bottom:1px solid #344b64}
+.action-group>*:not(summary){margin-left:12px;margin-right:12px}
+.action-group .duty-edit-actions:last-of-type{margin-bottom:12px}
+.action-group p{margin-top:12px!important}
+.backup-panel{padding:10px}
+.backup-panel .action-group{margin:0}
 </style>
 </head>
 <body>
@@ -288,14 +300,16 @@ body.focus-open{overflow:hidden}
   </section>
   <section class="duty-selected" id="dutySelected"><h3>รายละเอียดวันที่เลือก</h3><p>แตะวันที่ในปฏิทินเพื่อดูรายละเอียด</p></section>
   <section class="duty-selected backup-panel">
-   <h3>🛡️ สำรองข้อมูล MISSION INSPECTOR</h3>
-   <p>บันทึกข้อมูลร้านทอง ภารกิจ และการปรับตารางเวรไว้เป็นไฟล์ เพื่อป้องกันข้อมูลสูญหาย</p>
-   <div class="duty-edit-actions">
-    <button type="button" class="gold-entry" id="exportBackup">⬇️ สำรองข้อมูล</button>
-    <button type="button" class="remove-rest" id="importBackup">⬆️ กู้คืนข้อมูล</button>
-   </div>
-   <input type="file" id="backupFileInput" accept=".json,application/json" style="display:none">
-   <div class="duty-edit-note">แนะนำให้สำรองข้อมูลหลังเพิ่มหรือแก้ไขรายการสำคัญ และเก็บไฟล์ไว้ในแอป Files หรือ iCloud Drive</div>
+   <details class="action-group">
+    <summary>🛡️ สำรอง / กู้คืนข้อมูล <span>ป้องกันข้อมูลสูญหาย</span></summary>
+    <p>บันทึกข้อมูลร้านทอง ภารกิจ และการปรับตารางเวรไว้เป็นไฟล์</p>
+    <div class="duty-edit-actions">
+     <button type="button" class="gold-entry" id="exportBackup">⬇️ สำรองข้อมูล</button>
+     <button type="button" class="remove-rest" id="importBackup">⬆️ กู้คืนข้อมูล</button>
+    </div>
+    <input type="file" id="backupFileInput" accept=".json,application/json" style="display:none">
+    <div class="duty-edit-note">แนะนำให้เก็บไฟล์สำรองไว้ในแอป Files หรือ iCloud Drive</div>
+   </details>
   </section>
   <div class="duty-footnote">รอบเริ่มต้น 19 เมษายน 2569 เป็นวันเข้าเวร · เข้าเวร 08:00–08:00 น. ของวันถัดไป<br>วนซ้ำ เข้าเวร 1 วัน → พัก 2 วัน · ตารางถึง 31 ธันวาคม 2570</div>
  </section>
@@ -689,28 +703,29 @@ show();
   byId("dutyNextCount").textContent=nextDate?nextDays+" วัน":"—";
   const selectedState=dutyState(dutySelected),selectedKey=dateKey(dutySelected),hasOverride=!!dutyRestOverrides[selectedKey];
   const canEdit=selectedState.kind!=="outside";
-  const actions=canEdit?'<div class="duty-edit-actions">'+
+  const actions=canEdit?'<details class="action-group"><summary>🗓️ จัดการตารางเวร <span>เปลี่ยนวันเข้าเวร / วันพัก</span></summary><div class="duty-edit-actions">'+
    '<button type="button" class="set-work" id="setDutyWork">🔴 กำหนดเป็นวันเข้าเวร</button>'+
    '<button type="button" class="set-rest2" id="setDutyRest">🟢 กำหนดเป็นวันพัก</button>'+
    '<button type="button" class="remove-rest" id="resetDutyDay" '+(hasOverride?'':'disabled')+'>↶ คืนค่าตารางเวรเดิม</button>'+
-   '</div><div class="duty-edit-note">เลือกประเภทวันเพื่อเพิ่มหรือแก้ไขได้ทันที · ปุ่มคืนค่าจะลบการแก้ไขเฉพาะวันที่เลือก และกลับไปใช้รอบเวรปกติ</div>':'';
+   '</div><div class="duty-edit-note">การคืนค่าจะลบการแก้ไขเฉพาะวันที่เลือก และกลับไปใช้รอบเวรปกติ</div></details>':'';
   const currentMission=calendarMissions[selectedKey]||"";
-  const missionPanel='<div class="duty-edit-note" style="margin-top:14px"><b style="color:#f0d27f">📝 ภารกิจประจำวัน</b></div>'+
+  const missionPanel='<details class="action-group"><summary>📝 ภารกิจประจำวัน <span>'+(currentMission?'บันทึกแล้ว':'เพิ่ม / แก้ไขภารกิจ')+'</span></summary>'+
    '<div class="duty-edit-actions" style="align-items:stretch"><input id="missionNameInput" type="text" maxlength="60" placeholder="เช่น ประชุม, ตรวจพื้นที่, พัก, ลาพักผ่อน" value="'+currentMission.replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;")+'" style="flex:1;min-width:100%;padding:11px;border-radius:10px;background:#0b192b;color:#f4f7fb;border:1px solid #425671"></div>'+
    '<div class="duty-edit-actions"><button type="button" class="gold-entry" id="saveMissionName">บันทึกภารกิจ</button>'+(currentMission?'<button type="button" class="remove-rest" id="deleteMissionName">ลบภารกิจ</button>':'')+'</div>'+
-   '<div class="duty-shop-note">สีแดง = ทุกวันยกเว้นพักวันที่ 1, พักวันที่ 2 และวันลา · สีเหลือง = วันลาที่บันทึกคำว่า “ลา”</div>';
+   '<div class="duty-shop-note">สีแดง = วันปฏิบัติงานหรือมีภารกิจ · สีเหลือง = วันลาที่บันทึกคำว่า “ลา”</div></details>';
   const currentShop=goldShopVisits[selectedKey]||"";
   const currentShopType=goldShopVisitTypes[selectedKey]||"";
   const shopTypePanel=currentShop?'<div class="duty-shop-note">เลือกลักษณะการเข้าร้านทอง</div><div class="duty-shop-type-options">'+
    '<button type="button" id="shopTypeHired" '+(currentShopType==="รับจ้าง"?'class="shop-type-current"':'')+'>รับจ้าง</button>'+
    '<button type="button" id="shopTypeOwnDuty" '+(currentShopType==="เวรตัวเอง"?'class="shop-type-current"':'')+'>เวรตัวเอง</button></div>':'';
   const shopDetailPopup=(currentShop&&currentShopType)?'<div class="duty-shop-detail-popup"><b>รายละเอียดร้านทอง</b>🏪 '+currentShop+' · '+currentShopType+'</div>':'';
-  const shopPanel='<div class="duty-edit-actions"><button type="button" class="gold-entry" id="toggleGoldShop">🏪 '+(currentShop?'เปลี่ยน / จัดการร้านทอง':'เข้าร้านทอง')+'</button></div>'+
+  const shopPanel='<details class="action-group"><summary>🏪 บันทึกร้านทอง <span>'+(currentShop?'มีรายการแล้ว':'เพิ่ม / แก้ไขรายการ')+'</span></summary>'+
+   '<div class="duty-edit-actions"><button type="button" class="gold-entry" id="toggleGoldShop">เลือก / เปลี่ยนร้านทอง</button></div>'+
    '<div id="goldShopChoices" style="display:'+(currentShop?'flex':'none')+'" class="duty-shop-options">'+
    '<button type="button" id="chooseThaiPrayoon" '+(currentShop==="ไทยประยูร"?'class="shop-current"':'')+'>ไทยประยูร</button>'+
    '<button type="button" id="chooseSereewat" '+(currentShop==="เสรีวัฒน์"?'class="shop-current"':'')+'>เสรีวัฒน์</button>'+
    (currentShop?'<button type="button" class="shop-remove" id="removeGoldShop">ลบรายการร้านทอง</button>':'')+
-   '</div>'+shopTypePanel+shopDetailPopup+'<div class="duty-shop-note">'+(currentShop?'วันที่เลือกบันทึกว่าเข้าร้าน '+currentShop+' · เลือกร้านใหม่เพื่อแก้ไข หรือกดลบรายการ':'เลือกวันที่ แล้วกดเข้าร้านทองเพื่อเลือกร้านที่ไป')+'</div>';
+   '</div>'+shopTypePanel+shopDetailPopup+'<div class="duty-shop-note">'+(currentShop?'วันที่เลือกบันทึกว่าเข้าร้าน '+currentShop+' · เลือกร้านใหม่เพื่อแก้ไข หรือกดลบรายการ':'เลือกวันที่ แล้วกดเลือกร้านทอง')+'</div></details>';
   byId("dutySelected").innerHTML='<h3>'+dutyThaiDate(dutySelected)+' · วัน'+dayNames[dutySelected.getDay()]+'</h3><p><b style="color:'+colors[selectedState.kind]+'">'+selectedState.label+'</b></p><p>'+selectedState.detail+'</p>'+actions+missionPanel+shopPanel;
   const missionInput=byId("missionNameInput"),saveMission=byId("saveMissionName"),deleteMission=byId("deleteMissionName");
   if(saveMission)saveMission.addEventListener("click",()=>{const value=missionInput.value.trim();if(!value){alert("กรุณากรอกชื่อภารกิจ");return;}calendarMissions[selectedKey]=value;saveCalendarMissions();renderDuty();});
