@@ -75,7 +75,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .length button{padding:7px 12px;border-radius:9px;font-size:11px;background:#0d1b2c}
 .length strong{color:var(--text);font-size:13px;min-width:52px}
 .status{min-height:20px;text-align:center;color:var(--green);font-size:11px;margin-top:18px}
-.cycle-progress{margin:12px auto 0;color:#b9c7d7;font-size:11px;letter-spacing:.5px}.cycle-dots{display:flex;justify-content:center;gap:8px;margin-top:9px}.cycle-dots span{width:9px;height:9px;border-radius:50%;background:#34475e;border:1px solid #64768b}.cycle-dots span.done{background:var(--gold);border-color:var(--gold);box-shadow:0 0 8px #e9c47766}
+.cycle-progress{margin:12px auto 0;color:#b9c7d7;font-size:11px;letter-spacing:.5px}.cycle-dots{display:flex;justify-content:center;gap:12px;margin-top:10px}.cycle-dots button{width:30px;height:30px;border-radius:50%;background:#34475e;border:1px solid #64768b;color:#aebed0;font-size:12px;font-weight:800;cursor:pointer;padding:0;display:grid;place-items:center}.cycle-dots button.done{background:linear-gradient(145deg,#fff0b0,#d7a943 58%,#93651d);border-color:#ffe7a0;color:#39280d;box-shadow:0 0 12px #e9c47788,inset 0 1px 2px #fff9}.cycle-hint{font-size:10px;color:#8294a9;text-align:center;margin-top:6px}
 .bottom{text-align:center;color:#64768c;font-size:10px;letter-spacing:.5px;margin-top:24px}
 .focus-launch{width:100%;margin-top:12px;background:transparent;border:1px solid #8d7449;color:var(--gold);padding:13px}
 .focus-overlay{display:none;position:fixed;inset:0;z-index:20;padding:calc(env(safe-area-inset-top) + 18px) 20px calc(env(safe-area-inset-bottom) + 20px);background:radial-gradient(ellipse at 50% 0%,#274969 0,transparent 48%),#081321;align-items:center;justify-content:center}
@@ -273,7 +273,7 @@ body.focus-open{overflow:hidden}
    <button class="rest-button" id="restStart">☕ พัก 5 นาที</button>
    <div class="length"><span>เวลาต่อรอบ</span><button id="minus" aria-label="ลดเวลา">−</button><strong id="lengthText">25 นาที</strong><button id="plus" aria-label="เพิ่มเวลา">+</button></div>
    <div class="status" id="status" aria-live="polite">พร้อมเริ่มภารกิจ</div>
-   <div class="cycle-progress" id="cycleProgress">รอบที่ 1 / 4</div><div class="cycle-dots" id="cycleDots"><span></span><span></span><span></span><span></span></div>
+   <div class="cycle-progress" id="cycleProgress">รอบที่ 1 / 4</div><div class="cycle-dots" id="cycleDots" aria-label="ติ๊กบันทึกรอบการอ่าน"><button type="button" aria-label="รอบที่ 1">1</button><button type="button" aria-label="รอบที่ 2">2</button><button type="button" aria-label="รอบที่ 3">3</button><button type="button" aria-label="รอบที่ 4">4</button></div><div class="cycle-hint">แตะหมายเลขเพื่อทำเครื่องหมายรอบที่อ่านจบแล้ว · บันทึกอัตโนมัติ</div>
    <button class="focus-launch" id="focusOpen">⛶ เข้าสู่ Focus Mode</button>
    <button class="notes-launch" id="notesOpen">⇩ ส่งออกกระดาษสำหรับจด</button>
   </section>
@@ -403,6 +403,13 @@ function renderDailyPlan(){
 }
 renderDailyPlan();
 let minutes=25,duration=minutes*60,remaining=duration,interval=null,endAt=null,timerMode="focus",breakAvailable=false,completedSessions=0,breakDuration=300,breakKind="short";
+const roundStorageKey="missionInspectorCompletedRoundsV1";
+let completedRounds=[false,false,false,false];
+try{const saved=JSON.parse(localStorage.getItem(roundStorageKey)||"null");if(Array.isArray(saved)&&saved.length===4)completedRounds=saved.map(Boolean);}catch(e){}
+completedSessions=completedRounds.filter(Boolean).length;
+function saveCompletedRounds(){try{localStorage.setItem(roundStorageKey,JSON.stringify(completedRounds));}catch(e){$("status").textContent="ไม่สามารถบันทึกรอบการอ่านในอุปกรณ์นี้ได้";}}
+function toggleRound(index){completedRounds[index]=!completedRounds[index];completedSessions=completedRounds.filter(Boolean).length;saveCompletedRounds();show();$("status").textContent=completedRounds[index]?"บันทึกว่าจบรอบที่ "+(index+1)+" แล้ว":"ยกเลิกเครื่องหมายรอบที่ "+(index+1);}
+function markNextRound(){const next=completedRounds.findIndex(v=>!v);if(next>=0)completedRounds[next]=true;completedSessions=completedRounds.filter(Boolean).length;saveCompletedRounds();}
 function show(){
  const m=Math.floor(remaining/60),s=remaining%60;
  const time=String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
@@ -426,7 +433,7 @@ function show(){
  $("start").textContent=timerMode==="break"?(remaining===0?"▶ เริ่มอ่านต่อ":breakKind==="long"?"▶ เริ่มพักยาวต่อ":"▶ เริ่มพักต่อ"):"▶ เริ่มอ่าน";
  $("focusStart").textContent=timerMode==="break"?(remaining===0?"▶ เริ่มอ่านต่อ":breakKind==="long"?"▶ เริ่มพักยาวต่อ":"▶ เริ่มพักต่อ"):"▶ เริ่มอ่าน";
  $("cycleProgress").textContent=completedSessions>=4?"ครบ 4 รอบ · พักยาว 30 นาที":`อ่านแล้ว ${completedSessions} / 4 รอบ · รอบถัดไป ${Math.min(completedSessions+1,4)}`;
- [...$("cycleDots").children].forEach((dot,i)=>dot.classList.toggle("done",i<completedSessions));
+ [...$("cycleDots").children].forEach((dot,i)=>{dot.classList.toggle("done",completedRounds[i]);dot.textContent=completedRounds[i]?"✓":String(i+1);dot.setAttribute("aria-pressed",String(completedRounds[i]));});
 }
 function stop(){if(interval)clearInterval(interval);interval=null;endAt=null}
 function alertCompletion(message){
@@ -445,7 +452,7 @@ function tick(){
  if(remaining<=0){
   stop();
   if(timerMode==="focus"){
-   completedSessions=Math.min(4,completedSessions+1);
+   markNextRound();
    breakKind=completedSessions===4?"long":"short";
    breakDuration=breakKind==="long"?1800:300;
    breakAvailable=true;
@@ -453,13 +460,14 @@ function tick(){
    alertCompletion(breakKind==="long"?"ครบ 4 รอบแล้ว! ถึงเวลาพักยาว 30 นาที 🎉":"ครบเวลาอ่านแล้ว! พัก 5 นาทีได้เลย ☕");
   }else{
    const wasLongBreak=breakKind==="long";
-   if(wasLongBreak)completedSessions=0;
+   if(wasLongBreak){completedRounds=[false,false,false,false];completedSessions=0;saveCompletedRounds();}
    timerMode="focus";breakAvailable=false;duration=minutes*60;remaining=duration;
    show();
    alertCompletion(wasLongBreak?"พักยาวครบแล้ว! เริ่ม Cycle ใหม่ได้เลย 💪":"พักครบ 5 นาทีแล้ว! กลับไปอ่านรอบถัดไปได้เลย 💪");
   }
  }
 }
+[...$("cycleDots").children].forEach((dot,i)=>dot.addEventListener("click",()=>toggleRound(i)));
 $("subject").addEventListener("change",e=>{
  $("subjectNote").textContent=subjects[e.target.value];
  $("focusSubject").textContent=e.target.value;
@@ -499,7 +507,7 @@ $("pause").addEventListener("click",()=>{
  $("status").textContent="พักเวลาไว้แล้ว";
 });
 $("reset").addEventListener("click",()=>{
- stop();timerMode="focus";breakAvailable=false;completedSessions=0;breakKind="short";breakDuration=300;duration=minutes*60;remaining=duration;show();$("status").textContent="เริ่ม Cycle ใหม่ได้เลย";
+ stop();timerMode="focus";breakAvailable=false;completedRounds=[false,false,false,false];completedSessions=0;saveCompletedRounds();breakKind="short";breakDuration=300;duration=minutes*60;remaining=duration;show();$("status").textContent="เริ่ม Cycle ใหม่ได้เลย";
 });
 function changeLength(delta){
  if(interval||timerMode==="break")return;
