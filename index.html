@@ -624,7 +624,7 @@ show();
   for(let n=1;n<=total;n++){
    const d=new Date(y,m,n),st=dutyState(d);
    if(st.kind==="work")workCount++;else if(st.kind==="rest1"||st.kind==="rest2")restCount++;
-   const b=document.createElement("button");b.type="button";b.className="duty-day "+st.kind;
+   const b=document.createElement("button");b.type="button";b.dataset.date=dateKey(d);b.className="duty-day "+st.kind;
    if(d.getTime()===today.getTime())b.classList.add("today");
    if(d.getTime()===dutySelected.getTime())b.classList.add("selected");
    const tag=st.kind==="work"?"เข้าเวร":(st.kind==="rest"||st.kind==="rest1"||st.kind==="rest2")?"พัก":"";
@@ -635,7 +635,7 @@ show();
    const displayTag=mission?mission:(shopVisit?"🏪 "+shopVisit:tag);
    const shopExtra=(mission&&shopVisit)?'<span class="duty-extra-tag">🏪 '+shopVisit+'</span>':"";
    b.innerHTML='<span class="duty-num">'+n+'</span><span class="duty-tag">'+displayTag.replace(/</g,"&lt;").replace(/>/g,"&gt;")+'</span>'+shopExtra;
-   b.addEventListener("click",()=>{dutySelected=dateOnly(d);renderDuty();const visit=goldShopVisits[dayKey],visitType=goldShopVisitTypes[dayKey];if(visit&&visitType)openGoldVisitPopup(d,visit,visitType,b);else closeGoldVisitPopup();});
+   b.addEventListener("click",()=>{dutySelected=dateOnly(d);renderDuty();const visit=goldShopVisits[dayKey],visitType=goldShopVisitTypes[dayKey],newAnchor=byId("dutyDays").querySelector('[data-date="'+dayKey+'"]');if(visit&&visitType&&newAnchor)openGoldVisitPopup(d,visit,visitType,newAnchor);else closeGoldVisitPopup();});
    container.appendChild(b);
   }
   byId("dutyWorkCount").textContent=workCount;byId("dutyRestCount").textContent=restCount;
