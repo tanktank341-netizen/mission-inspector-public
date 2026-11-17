@@ -573,6 +573,7 @@ show();
  let goldShopVisits={};
  try{goldShopVisits=JSON.parse(localStorage.getItem(goldShopStorageKey)||"{}")||{};}catch(e){goldShopVisits={};}
  function saveGoldShopVisits(){try{localStorage.setItem(goldShopStorageKey,JSON.stringify(goldShopVisits));}catch(e){alert("ไม่สามารถบันทึกข้อมูลร้านทองในอุปกรณ์นี้ได้");}}
+ let pendingGoldShopName="",pendingGoldShopDate="";
  const overrideStorageKey="missionInspectorDutyRestOverridesV1";
  let dutyRestOverrides={};
  try{dutyRestOverrides=JSON.parse(localStorage.getItem(overrideStorageKey)||"{}")||{};}catch(e){dutyRestOverrides={};}
@@ -721,9 +722,10 @@ show();
    '<div class="duty-edit-actions" style="align-items:stretch"><input id="missionNameInput" type="text" maxlength="60" placeholder="เช่น ประชุม, ตรวจพื้นที่, พัก, ลาพักผ่อน" value="'+currentMission.replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;")+'" style="flex:1;min-width:100%;padding:11px;border-radius:10px;background:#0b192b;color:#f4f7fb;border:1px solid #425671"></div>'+
    '<div class="duty-edit-actions"><button type="button" class="gold-entry" id="saveMissionName">บันทึกภารกิจ</button>'+(currentMission?'<button type="button" class="remove-rest" id="deleteMissionName">ลบภารกิจ</button>':'')+'</div>'+
    '<div class="duty-shop-note">สีแดง = วันปฏิบัติงานหรือมีภารกิจ · สีเหลือง = วันลาที่บันทึกคำว่า “ลา”</div></details>';
-  const currentShop=goldShopVisits[selectedKey]||"";
-  const currentShopType=goldShopVisitTypes[selectedKey]||"";
-  const shopTypePanel=currentShop?'<div class="duty-shop-note">เลือกลักษณะการเข้าร้านทอง</div><div class="duty-shop-type-options">'+
+  const hasPendingShop=pendingGoldShopDate===selectedKey&&!!pendingGoldShopName;
+  const currentShop=hasPendingShop?pendingGoldShopName:(goldShopVisits[selectedKey]||"");
+  const currentShopType=hasPendingShop?"":(goldShopVisitTypes[selectedKey]||"");
+  const shopTypePanel=currentShop?'<div class="duty-shop-note">'+(hasPendingShop?'เลือกประเภทรายการเพื่อบันทึกให้เสร็จ':'เลือกลักษณะการเข้าร้านทอง')+'</div><div class="duty-shop-type-options">'+
    '<button type="button" id="shopTypeHired" '+(currentShopType==="รับจ้าง"?'class="shop-type-current"':'')+'>รับจ้าง</button>'+
    '<button type="button" id="shopTypeOwnDuty" '+(currentShopType==="เวรตัวเอง"?'class="shop-type-current"':'')+'>เวรตัวเอง</button></div>':'';
   const shopDetailPopup=(currentShop&&currentShopType)?'<div class="duty-shop-detail-popup"><b>รายละเอียดร้านทอง</b>🏪 '+currentShop+' · '+currentShopType+'</div>':'';
@@ -745,10 +747,17 @@ show();
   if(resetBtn)resetBtn.addEventListener("click",()=>{delete dutyRestOverrides[selectedKey];saveDutyOverrides();renderDuty();});
   const shopToggle=byId("toggleGoldShop"),shopChoices=byId("goldShopChoices");
   if(shopToggle)shopToggle.addEventListener("click",()=>{shopChoices.style.display=shopChoices.style.display==="none"?"flex":"none";});
-  const chooseShop=(name)=>{goldShopVisits[selectedKey]=name;delete goldShopVisitTypes[selectedKey];saveGoldShopVisits();saveGoldShopVisitTypes();renderDuty();};
+  const chooseShop=(name)=>{pendingGoldShopName=name;pendingGoldShopDate=selectedKey;renderDuty();};
   const thaiShop=byId("chooseThaiPrayoon"),sereeShop=byId("chooseSereewat"),removeShop=byId("removeGoldShop");
   const hiredType=byId("shopTypeHired"),ownDutyType=byId("shopTypeOwnDuty");
-  const chooseShopType=(type)=>{goldShopVisitTypes[selectedKey]=type;saveGoldShopVisitTypes();renderDuty();};
+  const chooseShopType=(type)=>{
+   const shopToSave=(pendingGoldShopDate===selectedKey&&pendingGoldShopName)?pendingGoldShopName:goldShopVisits[selectedKey];
+   if(!shopToSave){alert("กรุณาเลือกร้านทองก่อน");return;}
+   goldShopVisits[selectedKey]=shopToSave;
+   goldShopVisitTypes[selectedKey]=type;
+   pendingGoldShopName="";pendingGoldShopDate="";
+   saveGoldShopVisits();saveGoldShopVisitTypes();renderDuty();
+  };
   if(hiredType)hiredType.addEventListener("click",()=>chooseShopType("รับจ้าง"));
   if(ownDutyType)ownDutyType.addEventListener("click",()=>chooseShopType("เวรตัวเอง"));
   if(thaiShop)thaiShop.addEventListener("click",()=>chooseShop("ไทยประยูร"));
